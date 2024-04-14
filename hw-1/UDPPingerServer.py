@@ -18,7 +18,7 @@ while True:
 	# Receive the client packet along with the address it is coming from
 	message, address = serverSocket.recvfrom(1024)
 
-	print("Received messsage: " + str(message))
+	print("Received messsage: " + message.decode())
 	print("From: " + str(address))
 
 	# Capitalize the message from the client
