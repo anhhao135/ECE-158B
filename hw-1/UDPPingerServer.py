@@ -20,6 +20,7 @@ while True:
 
 	print("Received messsage: " + message.decode())
 	print("From: " + str(address))
+	print("---------------------------------------")
 
 	# Capitalize the message from the client
 	message = message.upper()

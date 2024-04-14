@@ -23,5 +23,7 @@ for i in range(numberOfPings):
 	except:
 		print("Ping timed out!")
 
+	print("---------------------------------------")
+
 
 
