@@ -3,6 +3,9 @@
 import random
 from socket import *
 
+serverName = '192.168.1.178'
+serverPort = 1919
+
 
 # Create a UDP socket
 # Notice the use of SOCK_DGRAM for UDP packets
