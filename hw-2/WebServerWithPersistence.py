@@ -18,8 +18,9 @@ while True:
         print("---------------------------------------")
         print("Received messsage: " + message.decode())
         print("From: " + str(clientAddress))
-        print(message.decode().split())
         print("---------------------------------------")
+        connectionType = message.decode().split()[6] #either keep-alive or close
+
         filename = message.decode().split()[1] #get the first field of the message which is the request file name and directory
         f = open(filename[1:], 'rb') #open the file by path in the server local directory
         response = f.read() #read the file contents as bytes and save it in a response variable
@@ -29,7 +30,10 @@ while True:
         #below the blank line are the contents of the HTML page to be rendered on the client's browser
         connectionSocket.send(response) #send the response to the client
         connectionSocket.send("\r\n".encode()) #send a carriage return and new line to signify the end of the HTTP response
-        connectionSocket.close() #close the TCP connection so other clients can request
+
+        if connectionType == 'close':
+            connectionSocket.close() #close the TCP connection so other clients can request
+
     except IOError: #if opening the request file path results in the file not existing, catch this error and return a 404 HTTP response as well as a 404 not found HTML page
         # Send HTTP response message for file not found
         connectionSocket.send("HTTP/1.1 404 Not Found\r\n\r\n".encode())
