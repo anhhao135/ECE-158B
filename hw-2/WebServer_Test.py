@@ -2,18 +2,26 @@
 #import socket module
 from socket import *
 import sys # In order to terminate the program
+
+IP = '0.0.0.0'
+PORT = 8000
+
 serverSocket = socket(AF_INET, SOCK_STREAM) #TCP
-serverSocket.bind(('', 1919))
+serverSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+serverSocket.bind((IP, PORT))
 serverSocket.listen(1)
 print("Server is now listening")
 
 while True:
     clientConnection, clientAddress = serverSocket.accept()
+    print("here")
     message, address = clientConnection.recvfrom(1024)
     # Print out datagram info
     print("Received messsage: " + message.decode())
     print("From: " + str(address))
     print("---------------------------------------")
+    response = 'HTTP/1.0 200 OK\n\nHello World'
+    clientConnection.sendall(response.encode())
     clientConnection.close()
 
 serverSocket.close()
