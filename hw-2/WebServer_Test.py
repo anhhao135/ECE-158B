@@ -3,7 +3,7 @@
 from socket import *
 import sys # In order to terminate the program
 
-IP = '127.0.0.1'
+IP = '192.168.1.178'
 PORT = 8000
 
 serverSocket = socket(AF_INET, SOCK_STREAM) #TCP
