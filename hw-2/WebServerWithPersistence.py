@@ -25,6 +25,8 @@ while True:
         if connectionType == 'keep-alive':
             while True:
                 print("KEEPING ALIVE")
+                if message == '':
+                    print("bad request")
                 filename = message.decode().split()[1] #get the first field of the message which is the request file name and directory
                 print(filename)
                 f = open(filename[1:], 'rb') #open the file by path in the server local directory
