@@ -33,6 +33,7 @@ if persistent:
     print("Persistent transaction took: " + str(totalTime))
 else:
     startTime = time.time()
+    totalBytesReceived = 0
     for requestedObjectPath in requestedObjectPaths:
         print(requestedObjectPath)
         clientSocket = socket(AF_INET, SOCK_STREAM) 
@@ -40,7 +41,7 @@ else:
         clientSocket.connect((str(serverHostIP), int(serverHostPort)))
         clientSocket.send(message.encode())
         message = clientSocket.recv(1024)
-        totalBytesReceived = 0
+
         while len(message) > 0:
             #print("---------------------------------------")
             #print("Received messsage length: " + str(len(message)))
@@ -49,7 +50,7 @@ else:
             totalBytesReceived = totalBytesReceived + len(message)
             message = clientSocket.recv(1024)
         clientSocket.close()
-        print("Bytes received: " + str(totalBytesReceived))
+    print("Bytes received: " + str(totalBytesReceived))
     endTime = time.time() #end RTT timer
     totalTime = endTime - startTime
     print("Non-persistent transaction took: " + str(totalTime))
