@@ -20,6 +20,7 @@ while True:
         print("From: " + str(clientAddress))
         print("---------------------------------------")
         filename = message.decode().split()[1] #get the first field of the message which is the request file name and directory
+        print(message.decode().split())
         connectionType = message.decode().split()[6]
         f = open(filename[1:], 'rb') #open the file by path in the server local directory
         if connectionType == 'close':
