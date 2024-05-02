@@ -20,15 +20,35 @@ while True:
         print("From: " + str(clientAddress))
         print("---------------------------------------")
         filename = message.decode().split()[1] #get the first field of the message which is the request file name and directory
+        connectionType = message.decode().split()[6]
         f = open(filename[1:], 'rb') #open the file by path in the server local directory
-        response = f.read() #read the file contents as bytes and save it in a response variable
-        f.close() #close out file so other processes can access it
-        connectionSocket.send("HTTP/1.1 200 OK\r\n\r\n".encode()) #send an OK 200 response as the header so the client's browser can signify a successful page load to the client
-        #leave a blank line with two carriage returns and two new lines
-        #below the blank line are the contents of the HTML page to be rendered on the client's browser
-        connectionSocket.send(response) #send the response to the client
-        connectionSocket.send("\r\n".encode()) #send a carriage return and new line to signify the end of the HTTP response
-        connectionSocket.close() #close the TCP connection so other clients can request
+        if connectionType == 'close':
+            print("Non-persistent connection")
+            response = f.read() #read the file contents as bytes and save it in a response variable
+            f.close() #close out file so other processes can access it
+            connectionSocket.send("HTTP/1.1 200 OK\r\n\r\n".encode()) #send an OK 200 response as the header so the client's browser can signify a successful page load to the client
+            #leave a blank line with two carriage returns and two new lines
+            #below the blank line are the contents of the HTML page to be rendered on the client's browser
+            connectionSocket.send(response) #send the response to the client
+            connectionSocket.send("\r\n".encode()) #send a carriage return and new line to signify the end of the HTTP response
+            connectionSocket.close() #close the TCP connection so other clients can request
+        else:
+            print("Persistent connection")
+            requestedObjectPaths = ["objects/cat0.png", "objects/cat1.jpg", "objects/cat2.jpg", "objects/cat3.jpg", "objects/cat4.jpg", "objects/cat5.jpg", "objects/cat6.jpg", "objects/cat7.jpg", "objects/cat8.jpg", "objects/cat9.jpg", "objects/text0.txt", "objects/text1.txt", "objects/text2.txt", "objects/text3.txt", "objects/text4.txt", "objects/text5.txt", "objects/text6.txt", "objects/text7.txt", "objects/text8.txt", "objects/text9.txt"]
+            response = f.read()
+            for requestedObjectPath in requestedObjectPaths:
+                f = open(requestedObjectPath, 'rb')
+                response = response + f.read()
+            connectionSocket.send("HTTP/1.1 200 OK\r\n\r\n".encode()) #send an OK 200 response as the header so the client's browser can signify a successful page load to the client
+            #leave a blank line with two carriage returns and two new lines
+            #below the blank line are the contents of the HTML page to be rendered on the client's browser
+            connectionSocket.send(response) #send the response to the client
+            connectionSocket.send("\r\n".encode()) #send a carriage return and new line to signify the end of the HTTP response
+            connectionSocket.close() #close the TCP connection so other clients can request
+
+
+
+
     except IOError: #if opening the request file path results in the file not existing, catch this error and return a 404 HTTP response as well as a 404 not found HTML page
         # Send HTTP response message for file not found
         connectionSocket.send("HTTP/1.1 404 Not Found\r\n\r\n".encode())
