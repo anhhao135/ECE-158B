@@ -34,6 +34,7 @@ while True:
                 #below the blank line are the contents of the HTML page to be rendered on the client's browser
                 connectionSocket.send(response) #send the response to the client
                 connectionSocket.send("\r\n".encode()) #send a carriage return and new line to signify the end of the HTTP response
+                print("here")
                 message, address = connectionSocket.recvfrom(1024) #receive a message from the client; this is expected to be an HTTP request
                 #debug print out the request
                 print("---------------------------------------")
