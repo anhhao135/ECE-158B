@@ -6,7 +6,7 @@ IP = '192.168.1.178'
 PORT = 8000
 
 serverSocket = socket(AF_INET, SOCK_STREAM) #TCP
-serverSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+serverSocket.setsockopt(serverSocket.SOL_SOCKET, serverSocket.SO_REUSEADDR, 1)
 serverSocket.bind((IP, PORT))
 serverSocket.listen(1)
 print("Server is now listening")
