@@ -13,7 +13,7 @@ print("Server is now listening")
 while True:
     try:
         connectionSocket, clientAddress = serverSocket.accept() #accept any incoming TCP connection requests from clients
-        message, address = connectionSocket.recvfrom(1024) #receive a message from the client; this is expected to be an HTTP request
+        message = connectionSocket.recv(1024) #receive a message from the client; this is expected to be an HTTP request
         #debug print out the request
         print("---------------------------------------")
         print("Received messsage: " + message.decode())
