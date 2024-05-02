@@ -13,14 +13,13 @@ print("Server is now listening")
 
 while True:
 
-    clientConnection, clientAddress = serverSocket.accept()
-    message = clientConnection.recvfrom(1024)
+    connectionSocket, clientAddress = serverSocket.accept()
+    message, address = connectionSocket.recvfrom(1024)
     filename = message.split()[1]
-    print(filename)
-    # Print out datagram info
-    print("Received messsage: " + message.decode())
-    print("From: " + str(clientAddress))
-    print("---------------------------------------")
-    response = 'HTTP/1.0 200 OK\n\nHello World'
-    clientConnection.sendall(response.encode())
-    clientConnection.close()
+    f = open(filename[1:])
+    connectionSocket.send("HTTP/1.1 200 OK\r\n\r\n".encode())
+    for i in range(0, len(f)):
+            # encode the string using the provided encoding. This function returns the bytes object. If we don’t provide encoding, “utf-8” encoding is used as default.
+            connectionSocket.send(f[i].encode())
+    connectionSocket.send("\r\n".encode())
+    connectionSocket.close() 
