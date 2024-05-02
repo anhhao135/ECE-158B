@@ -29,7 +29,7 @@ while True:
                 f = open(filename[1:], 'rb') #open the file by path in the server local directory
                 response = f.read() #read the file contents as bytes and save it in a response variable
                 f.close() #close out file so other processes can access it
-                connectionSocket.send("HTTP/1.1 200 OK\r\nConnection: keep-alive\r\n\r\n".encode()) #send an OK 200 response as the header so the client's browser can signify a successful page load to the client
+                connectionSocket.send("HTTP/1.1 200 OK\r\nConnection: keep-alive\r\nContent-Length: " + str(len(response)) + "\r\n\r\n".encode()) #send an OK 200 response as the header so the client's browser can signify a successful page load to the client
                 #leave a blank line with two carriage returns and two new lines
                 #below the blank line are the contents of the HTML page to be rendered on the client's browser
                 connectionSocket.send(response) #send the response to the client
