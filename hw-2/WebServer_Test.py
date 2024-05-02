@@ -1,6 +1,5 @@
 #ECE158B, HW2. Skeleton Python Code for the Web Server.
 #import socket module
-from _socket import *
 from socket import *
 
 IP = '192.168.1.178'
