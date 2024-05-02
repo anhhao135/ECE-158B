@@ -14,11 +14,12 @@ print("Server is now listening")
 while True:
 
     clientConnection, clientAddress = serverSocket.accept()
-    print("here")
-    message, address = clientConnection.recvfrom(1024)
+    message = clientConnection.recvfrom(1024)
+    filename = message.split()[1]
+    print(filename)
     # Print out datagram info
     print("Received messsage: " + message.decode())
-    print("From: " + str(address))
+    print("From: " + str(clientAddress))
     print("---------------------------------------")
     response = 'HTTP/1.0 200 OK\n\nHello World'
     clientConnection.sendall(response.encode())
