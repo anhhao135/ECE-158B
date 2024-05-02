@@ -25,7 +25,6 @@ while True:
         if connectionType == 'keep-alive':
             while True:
                 print("KEEPING ALIVE")
-                print(len(message))
                 filename = message.decode().split()[1] #get the first field of the message which is the request file name and directory
                 print(filename)
                 f = open(filename[1:], 'rb') #open the file by path in the server local directory
@@ -39,12 +38,18 @@ while True:
                 connectionSocket.send(response) #send the response to the client
                 connectionSocket.send("\r\n".encode()) #send a carriage return and new line to signify the end of the HTTP response
                 print("here")
+
                 message, address = connectionSocket.recvfrom(1024) #receive a message from the client; this is expected to be an HTTP request
-                #debug print out the request
                 print("---------------------------------------")
                 print("Received messsage: " + message.decode())
                 print("From: " + str(clientAddress))
                 print("---------------------------------------")
+                while len(message) == 0:
+                    message, address = connectionSocket.recvfrom(1024) #receive a message from the client; this is expected to be an HTTP reques
+                    print("---------------------------------------")
+                    print("Received messsage: " + message.decode())
+                    print("From: " + str(clientAddress))
+                    print("---------------------------------------")
         else:
                 print("ONE TIME")
                 filename = message.decode().split()[1] #get the first field of the message which is the request file name and directory
