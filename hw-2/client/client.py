@@ -9,6 +9,7 @@ serverHostIP = sys.argv[1]
 serverHostPort = sys.argv[2]
 requestedObject = sys.argv[3]
 persistent = int(sys.argv[4]) #0 for non-persistent, 1 for persistent
+printServerResponse = int(sys.argv[5]) #0 for do not print, 1 for print; printing response can slow down transaction so disable for benchmarking
 
 requestedObjectPaths = ["objects/cat0.png", "objects/cat1.jpg", "objects/cat2.jpg", "objects/cat3.jpg", "objects/cat4.jpg", "objects/cat5.jpg", "objects/cat6.jpg", "objects/cat7.jpg", "objects/cat8.jpg", "objects/cat9.jpg", "objects/text0.txt", "objects/text1.txt", "objects/text2.txt", "objects/text3.txt", "objects/text4.txt", "objects/text5.txt", "objects/text6.txt", "objects/text7.txt", "objects/text8.txt", "objects/text9.txt"] #we are hardcoding the objects that will exists in the HTML file
 
@@ -24,6 +25,11 @@ if persistent: #only one TCP connection to get all objects
     message = clientSocket.recv(1024) #wait for a response
     totalBytesReceived = 0 #keep count of the total amount of bytes received from the server, including the headers
     while len(message) > 0: #keep receiving as long as there are bytes coming in from server
+        if printServerResponse:
+            print("---------------------------------------")
+            print("Received messsage: " + str(message))
+            print("From: " + str(serverHostIP))
+            print("---------------------------------------")
         totalBytesReceived = totalBytesReceived + len(message)
         message = clientSocket.recv(1024)
     clientSocket.close() #once there are no more received bytes, we close the persistent TCP connection
@@ -45,6 +51,11 @@ else: #one TCP connection per object
         clientSocket.send(message.encode())
         message = clientSocket.recv(1024)
         while len(message) > 0: #keep receiving bytes from server and track byte count
+            if printServerResponse:
+                print("---------------------------------------")
+                print("Received messsage: " + str(message))
+                print("From: " + str(serverHostIP))
+                print("---------------------------------------")
             totalBytesReceived = totalBytesReceived + len(message)
             message = clientSocket.recv(1024)
         clientSocket.close()

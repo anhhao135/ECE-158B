@@ -44,8 +44,9 @@ while True:
                 f = open(requestedObjectPath, 'rb')
                 response = f.read()
                 header = "HTTP/1.1 200 OK\r\nConnection: keep-alive\r\nContent-Length: " + str(len(response)) + "\r\n\r\n"
+                connectionSocket.send(header)
                 #persistent HTTP headers have to indicate the connection will be kept open as well as the length of the object that is being sent so the client can distinguish between difference objects in the stream
-                connectionSocket.send(response) #send the response to the client
+                connectionSocket.send(response) #send the response object to the client
                 connectionSocket.send("\r\n".encode()) #send a carriage return and new line to signify the end of the HTTP response
             connectionSocket.close() #close the TCP connection so other clients can request
 
