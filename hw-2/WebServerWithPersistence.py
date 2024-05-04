@@ -1,4 +1,4 @@
-#basic HTTP web server
+#basic HTTP web server with persistent request support
 from socket import *
 
 IP = '192.168.1.178' #IP of server machine
@@ -19,25 +19,25 @@ while True:
         print("Received messsage: " + message.decode())
         print("From: " + str(clientAddress))
         print("---------------------------------------")
-        connectionType = message.decode().split()[6] #either keep-alive or close
-        print(connectionType)
+        connectionType = message.decode().split()[6] #either keep-alive or close; former is persistent TCP connection
 
         if connectionType == 'keep-alive':
             while True:
-                print("KEEPING ALIVE")
+                print("Persistent HTTP")
                 filename = message.decode().split()[1] #get the first field of the message which is the request file name and directory
                 print(filename)
                 f = open(filename[1:], 'rb') #open the file by path in the server local directory
                 response = f.read() #read the file contents as bytes and save it in a response variable
                 f.close() #close out file so other processes can access it
                 header = "HTTP/1.1 200 OK\r\nConnection: keep-alive\r\nContent-Length: " + str(len(response)) + "\r\n\r\n"
-                print(header)
-                connectionSocket.send(header.encode()) #send an OK 200 response as the header so the client's browser can signify a successful page load to the client
+                connectionSocket.send(header.encode()) #send an OK 200 response as long as connection type and content length to indicate server can support persistent HTTP (keep-alive) and the length of the data in bytes so client knows when the data stream ends
                 #leave a blank line with two carriage returns and two new lines
                 #below the blank line are the contents of the HTML page to be rendered on the client's browser
                 connectionSocket.send(response) #send the response to the client
                 connectionSocket.send("\r\n".encode()) #send a carriage return and new line to signify the end of the HTTP response
                 print("here")
+
+                #since this is persistent HTTP, we do not close the TCP connection. we go straight to listening for the next HTTP request
 
                 message, address = connectionSocket.recvfrom(1024) #receive a message from the client; this is expected to be an HTTP request
                 print("---------------------------------------")
@@ -51,7 +51,7 @@ while True:
                     print("From: " + str(clientAddress))
                     print("---------------------------------------")
         else:
-                print("ONE TIME")
+                print("Non-persistent HTTP")
                 filename = message.decode().split()[1] #get the first field of the message which is the request file name and directory
                 f = open(filename[1:], 'rb') #open the file by path in the server local directory
                 response = f.read() #read the file contents as bytes and save it in a response variable
