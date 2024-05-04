@@ -43,7 +43,7 @@ else:
         message = clientSocket.recv(1024)
 
         while len(message) > 0:
-            #print("---------------------------------------")
+            #print("---------------------------------------") 
             #print("Received messsage length: " + str(len(message)))
             #print("From: " + str(serverHostIP))
             #print("---------------------------------------")
