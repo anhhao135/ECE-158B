@@ -40,10 +40,11 @@ while True:
             requestedObjectPaths.insert(0, str(filename[1:])) #along with the objects, the base HTML file should also be requested
             #hard code the object paths that would be associated with the base HTML file
             #in a more sophisticated server, it will automatically parse the HTML file to get this information
-            for requestedObjectPath in requestedObjectPaths: #iterate through the object paths and append it to the response
+            for requestedObjectPath in requestedObjectPaths: #iterate through the object paths and send it as a persistent response
                 f = open(requestedObjectPath, 'rb')
                 response = f.read()
                 header = "HTTP/1.1 200 OK\r\nConnection: keep-alive\r\nContent-Length: " + str(len(response)) + "\r\n\r\n"
+                #persistent HTTP headers have to indicate the connection will be kept open as well as the length of the object that is being sent so the client can distinguish between difference objects in the stream
                 connectionSocket.send(response) #send the response to the client
                 connectionSocket.send("\r\n".encode()) #send a carriage return and new line to signify the end of the HTTP response
             connectionSocket.close() #close the TCP connection so other clients can request
