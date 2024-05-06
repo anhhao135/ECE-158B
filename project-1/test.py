@@ -16,9 +16,23 @@ class Peer:
         self.top4Peers = []
 
     def refreshTop4Peers(self):
-        trackerPeers = self.tracker[1].copy()
-        trackerPeers.remove(self.IPAddress)
-        self.top4Peers = random.sample(trackerPeers, 4)
+        if len(self.downloadBandwidths) < 4:
+            trackerPeers = self.tracker[1].copy()
+            trackerPeers.remove(self.IPAddress)
+            self.top4Peers = random.sample(trackerPeers, 4)
+        else:
+            sortedDownloadBandwidths = dict(sorted(self.downloadBandwidths.items(), key=lambda item: item[1]))
+            #print(sortedDownloadBandwidths)
+            descendingPeerRankings = list(reversed(sortedDownloadBandwidths.keys()))
+            #print(descendingPeerRankings)
+            #print(descendingPeerRankings[:4])
+            self.top4Peers = descendingPeerRankings[:4]
+            
+    
+    def broadcastBandwidth(self):
+        for peerID in self.top4Peers:
+            self.peers[peerID].downloadBandwidths[self.IPAddress] = self.bandwidth / 4
+            self.uploadBandwidths[peerID] = self.bandwidth / 4
 
     def joinTracker(self):
         self.tracker[1].append(self.IPAddress)
@@ -43,12 +57,14 @@ class Peer:
         print("Receive buffer: " + str(self.receiveBuffer))
         print("Missing chunks: " + str(natsorted(self.missingChunks)))
         print("Top 4 peers: " + str(natsorted(self.top4Peers)))
+        print("Download bandwidths: " + str(self.downloadBandwidths))
+        print("Upload bandwidths: " + str(self.uploadBandwidths))
         print("--------")
 
 
 lowerBandwidth = 1
-higherBandwidth = 1000
-numberOfPeers = 6
+higherBandwidth = 5000
+numberOfPeers = 10
 peers = {}
 
 fileNumberOfChunks = 10
@@ -76,6 +92,16 @@ print(tracker)
 
 for peerIndex, peer in peers.items():
     peer.sendRandomHellos()
+    peer.refreshTop4Peers()
+    peer.broadcastBandwidth()
+
+
+for peerIndex, peer in peers.items():
+    peer.print()
+
+print("OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
+    
+for peerIndex, peer in peers.items():
     peer.refreshTop4Peers()
 
 for peerIndex, peer in peers.items():
