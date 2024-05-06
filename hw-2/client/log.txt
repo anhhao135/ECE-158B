@@ -1,2 +1,0 @@
-Bytes received: 0
-Persistent transaction took: 1.4152708053588867
