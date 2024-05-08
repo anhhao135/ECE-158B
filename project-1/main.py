@@ -2,12 +2,12 @@ from lib import *
 import matplotlib.pyplot as plt
 import numpy as np
 
-lowerBandwidth = 1
-higherBandwidth = 5000
-numberOfPeers = 100
+lowerBandwidth = 10
+higherBandwidth = 10000
+numberOfPeers = 50
 peers = {}
 
-fileNumberOfChunks = 100
+fileNumberOfChunks = 200
 torrentFileChunks = []
 for i in range(fileNumberOfChunks):
     chunk = str(i)
@@ -17,11 +17,11 @@ tracker = (torrentFileChunks, []) #tracker is tuple of (file size in chunks, lis
 
 #create the source file peer    
 sourcePeer = Peer(-1, higherBandwidth, peers, tracker, torrentFileChunks)
-#peers[-1] = sourcePeer
+peers[-1] = sourcePeer
 
 for i in range(numberOfPeers):
-    #peers[i] = Peer(i, random.randint(lowerBandwidth,higherBandwidth), peers, tracker, random.sample(torrentFileChunks, random.randint(0,fileNumberOfChunks - 1)))
-    peers[i] = Peer(i, random.randint(lowerBandwidth,higherBandwidth), peers, tracker, random.sample(torrentFileChunks, 10))
+    peers[i] = Peer(i, random.randint(lowerBandwidth,higherBandwidth), peers, tracker, random.sample(torrentFileChunks, random.randint(0,fileNumberOfChunks - 1)))
+    #peers[i] = Peer(i, random.randint(lowerBandwidth,higherBandwidth), peers, tracker, random.sample(torrentFileChunks, ))
 
 for peerIndex, peer in peers.items():
     peer.joinTracker()
@@ -38,9 +38,10 @@ print(tracker)
     #peer.print()
 
 
-rarestChunkRequestPeriod = 5
-topPeersRefreshPeriod = 10
-optimisticUnchokePeriod = 30
+rarestChunkRequestPeriod = 10
+topPeersRefreshPeriod = 20
+optimisticUnchokePeriod = 50
+clearRequestBufferPeriod = 500
 simulationTime = 1000
 
 percentageTrackers = {}
@@ -48,7 +49,12 @@ for peerIndex, peer in peers.items():
     percentageTrackers[peerIndex] = []
 
 for t in range(1,simulationTime):
-    print(t)
+
+    l = list(peers.items())
+    random.shuffle(l)
+    peers = dict(l)
+
+    #print(t)
     if t % rarestChunkRequestPeriod == 0:
         for peerIndex, peer in peers.items():
             peer.requestRarestChunkFromPeers()
@@ -66,10 +72,15 @@ for t in range(1,simulationTime):
     if t % optimisticUnchokePeriod == 0:
             for peerIndex, peer in peers.items():
                 peer.optimisticallyUnchokePeer()
+    if t % clearRequestBufferPeriod == 0:
+            for peerIndex, peer in peers.items():
+                peer.clearRequestBuffer()
 
     for peerIndex, peer in peers.items():
         percentage = peer.getDownloadPercentage()
         percentageTrackers[peerIndex].append(peer.getDownloadPercentage())
+        if peerIndex == 10:
+             peer.print()
         #if (int(percentage) == 100) and (peer in tracker[1]):
         #     print("leaving!")
         #     peer.leaveTracker()

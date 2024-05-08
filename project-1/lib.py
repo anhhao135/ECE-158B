@@ -29,6 +29,11 @@ class Peer:
             self.topPeers = descendingPeerRankings[:NUM_TOP_PEERS]
         else:
             self.topPeers = []
+        self.downloadBandwidths = {}
+
+
+    def clearRequestBuffer(self):
+        self.requestBuffer = []
 
     def optimisticallyUnchokePeer(self):
         if len(self.topPeers) > 0:
@@ -88,7 +93,7 @@ class Peer:
         self.peers[peerIP].receiveBuffer.append(chunkPacket)
 
     def processReceiveBuffer(self):
-        self.downloadBandwidths = {}
+        #self.downloadBandwidths = {}
         for packet in self.receiveBuffer:
             self.downloadBandwidths[packet[0]] = packet[1]
             if packet[2] in self.missingChunks:
@@ -99,16 +104,17 @@ class Peer:
     def sendChunksToTopPeers(self, t):
         requestCount = len(self.requestBuffer)
         if requestCount > 0:
-            sendBandwidth = 0
+            sendBandwidth = int(self.bandwidth / NUM_TOP_PEERS) 
 
             if requestCount >= NUM_TOP_PEERS:
                 sendBandwidth = int(self.bandwidth / NUM_TOP_PEERS) 
             else:
                 sendBandwidth = int(self.bandwidth / requestCount)
 
-            if int((1 / sendBandwidth) * 1000) % t == 0:
+            if int((1 / sendBandwidth) * 100) % t == 0:
                 sendCount = 0
                 remainingRequests = self.requestBuffer.copy()
+                #random.shuffle(self.requestBuffer)
                 for request in self.requestBuffer:
                     if (request[0] in self.topPeers or len(self.topPeers) == 0):
                         self.sendChunkToPeer(request[1], sendBandwidth, request[0])
