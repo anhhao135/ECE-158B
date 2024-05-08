@@ -2,6 +2,7 @@ import random
 from natsort import natsorted
 
 NUM_TOP_PEERS = 4
+REQUEST_BUFFER_SIZE = 50
 
 class Peer:
     def __init__(self, IPAddress, bandwidth, peers, tracker, acquiredChunks):
@@ -9,7 +10,7 @@ class Peer:
         self.bandwidth = bandwidth
         self.peers = peers
         self.tracker = tracker
-        self.acquiredChunks = acquiredChunks
+        self.acquiredChunks = acquiredChunks 
         self.torrentSourceChunks = None
         self.receiveBuffer = []
         self.requestBuffer = []
@@ -26,7 +27,9 @@ class Peer:
             #print(descendingPeerRankings)
             #print(descendingPeerRankings[:4])
             self.topPeers = descendingPeerRankings[:NUM_TOP_PEERS]
-    
+        else:
+            self.topPeers = []
+
     def optimisticallyUnchokePeer(self):
         if len(self.topPeers) > 0:
             notTopPeers = list(set(self.tracker[1]).difference(self.topPeers))
@@ -77,13 +80,15 @@ class Peer:
             for trackerPeerID in self.tracker[1]:
                 if trackerPeerID != self.IPAddress:
                     if rarestChunk in self.peers[trackerPeerID].acquiredChunks:
-                        self.peers[trackerPeerID].requestBuffer.append(chunkRequest)
+                        if len(self.peers[trackerPeerID].requestBuffer) < REQUEST_BUFFER_SIZE:
+                            self.peers[trackerPeerID].requestBuffer.append(chunkRequest)
 
     def sendChunkToPeer(self, chunk, bandwidth, peerIP):
         chunkPacket = (self.IPAddress, bandwidth, chunk)
         self.peers[peerIP].receiveBuffer.append(chunkPacket)
 
     def processReceiveBuffer(self):
+        self.downloadBandwidths = {}
         for packet in self.receiveBuffer:
             self.downloadBandwidths[packet[0]] = packet[1]
             if packet[2] in self.missingChunks:
@@ -91,7 +96,7 @@ class Peer:
                 self.acquiredChunks.append(packet[2])
         self.receiveBuffer = []
 
-    def sendChunksToTopPeers(self):
+    def sendChunksToTopPeers(self, t):
         requestCount = len(self.requestBuffer)
         if requestCount > 0:
             sendBandwidth = 0
@@ -100,17 +105,27 @@ class Peer:
                 sendBandwidth = int(self.bandwidth / NUM_TOP_PEERS) 
             else:
                 sendBandwidth = int(self.bandwidth / requestCount)
-            
-            sendCount = 0
-            remainingRequests = self.requestBuffer.copy()
-            for request in self.requestBuffer:
-                if (request[0] in self.topPeers or len(self.topPeers) == 0):
-                    self.sendChunkToPeer(request[1], sendBandwidth, request[0])
-                    remainingRequests.remove(request)
-                    sendCount = sendCount + 1
-                    if sendCount == NUM_TOP_PEERS:
-                        break
-            self.requestBuffer = remainingRequests.copy()
+
+            if int((1 / sendBandwidth) * 1000) % t == 0:
+                sendCount = 0
+                remainingRequests = self.requestBuffer.copy()
+                for request in self.requestBuffer:
+                    if (request[0] in self.topPeers or len(self.topPeers) == 0):
+                        self.sendChunkToPeer(request[1], sendBandwidth, request[0])
+                        remainingRequests.remove(request)
+                        sendCount = sendCount + 1
+                        if sendCount == NUM_TOP_PEERS:
+                            break
+                self.requestBuffer = remainingRequests.copy()
+                #print(sendCount)
+    
+    def getDownloadPercentage(self):
+        sourceFileChunkCount = len(self.torrentSourceChunks)
+        acquiredChunkCount = len(self.acquiredChunks)
+
+        if sourceFileChunkCount > 0:
+            percentage = (acquiredChunkCount / sourceFileChunkCount) * 100
+            return percentage
 
     def print(self):
         print("--------")

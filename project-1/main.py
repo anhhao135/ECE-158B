@@ -1,11 +1,13 @@
 from lib import *
+import matplotlib.pyplot as plt
+import numpy as np
 
 lowerBandwidth = 1
 higherBandwidth = 5000
-numberOfPeers = 10
+numberOfPeers = 100
 peers = {}
 
-fileNumberOfChunks = 50
+fileNumberOfChunks = 100
 torrentFileChunks = []
 for i in range(fileNumberOfChunks):
     chunk = str(i)
@@ -15,56 +17,68 @@ tracker = (torrentFileChunks, []) #tracker is tuple of (file size in chunks, lis
 
 #create the source file peer    
 sourcePeer = Peer(-1, higherBandwidth, peers, tracker, torrentFileChunks)
-peers[-1] = sourcePeer
+#peers[-1] = sourcePeer
 
 for i in range(numberOfPeers):
-    peers[i] = Peer(i, random.randint(lowerBandwidth,higherBandwidth), peers, tracker, random.sample(torrentFileChunks, random.randint(0,fileNumberOfChunks - 1)))
+    #peers[i] = Peer(i, random.randint(lowerBandwidth,higherBandwidth), peers, tracker, random.sample(torrentFileChunks, random.randint(0,fileNumberOfChunks - 1)))
+    peers[i] = Peer(i, random.randint(lowerBandwidth,higherBandwidth), peers, tracker, random.sample(torrentFileChunks, 10))
 
 for peerIndex, peer in peers.items():
     peer.joinTracker()
     peer.updateMissingChunks()
 
+    
+
 #peers[2].leaveTracker()
 
 print(tracker)
 
+
 #for peerIndex, peer in peers.items():
     #peer.print()
 
-for i in range(1,10000):
-    for peerIndex, peer in peers.items():
-        #peer.refreshTopPeers()
-        peer.requestRarestChunkFromPeers()
-        #peer.sendChunkToPeer('1', 10, 2)
+
+rarestChunkRequestPeriod = 5
+topPeersRefreshPeriod = 10
+optimisticUnchokePeriod = 30
+simulationTime = 1000
+
+percentageTrackers = {}
+for peerIndex, peer in peers.items():
+    percentageTrackers[peerIndex] = []
+
+for t in range(1,simulationTime):
+    print(t)
+    if t % rarestChunkRequestPeriod == 0:
+        for peerIndex, peer in peers.items():
+            peer.requestRarestChunkFromPeers()
 
     for peerIndex, peer in peers.items():
-        peer.print()
-        
-    print("OOOOOOOOOOOOOOOOOOOOOOOOOOO00000000000000000000000000000000000000000000OOOOOOOOOOOOOOOOO")
-
-    for peerIndex, peer in peers.items():
-        peer.sendChunksToTopPeers()
-
-    for peerIndex, peer in peers.items():
-        peer.print()
-    print("OOOOOOOOOOOOOOOOOOOOOOOOOOO00000000000000000000000000000000000000000000OOOOOOOOOOOOOOOOO")
-
+        peer.sendChunksToTopPeers(t)
+    
     for peerIndex, peer in peers.items():
         peer.processReceiveBuffer()
 
-    for peerIndex, peer in peers.items():
-        peer.print()
-    print("OOOOOOOOOOOOOOOOOOOOOOOOOOO00000000000000000000000000000000000000000000OOOOOOOOOOOOOOOOO")
-    if i % 5 == 0:
-        print("reevaluating!!!")
-        for peerIndex, peer in peers.items():
-            peer.refreshTopPeers()
+    if t % topPeersRefreshPeriod == 0:
+            for peerIndex, peer in peers.items():
+                peer.refreshTopPeers()
+
+    if t % optimisticUnchokePeriod == 0:
+            for peerIndex, peer in peers.items():
+                peer.optimisticallyUnchokePeer()
 
     for peerIndex, peer in peers.items():
-        peer.print()
-    print("OOOOOOOOOOOOOOOOOOOOOOOOOOO00000000000000000000000000000000000000000000OOOOOOOOOOOOOOOOO")
-    if (i+8) % 5 == 0:
-        print("unchoking!!!!")
-        for peerIndex, peer in peers.items():
-            peer.optimisticallyUnchokePeer()
-    input("Press Enter to continue...")
+        percentage = peer.getDownloadPercentage()
+        percentageTrackers[peerIndex].append(peer.getDownloadPercentage())
+        #if (int(percentage) == 100) and (peer in tracker[1]):
+        #     print("leaving!")
+        #     peer.leaveTracker()
+        
+
+
+plt.figure()
+for peerIndex, peer in peers.items():
+    plt.plot(np.array(percentageTrackers[peerIndex]), label = str(peerIndex))
+plt.legend()
+plt.show()
+
