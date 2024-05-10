@@ -1,13 +1,14 @@
 from lib import *
 import matplotlib.pyplot as plt
 import numpy as np
+from labellines import labelLines
 
-lowerBandwidth = 10
+lowerBandwidth = 2
 higherBandwidth = 1000
-numberOfPeers = 5
+numberOfPeers = 20
 peers = {}
 
-fileNumberOfChunks = 50
+fileNumberOfChunks = 200
 torrentFileChunks = []
 for i in range(fileNumberOfChunks):
     chunk = str(i)
@@ -20,11 +21,15 @@ tracker = (torrentFileChunks, []) #tracker is tuple of (file size in chunks, lis
 #sourcePeer = Peer(-1, higherBandwidth, peers, tracker, torrentFileChunks)
 #peers[-1] = sourcePeer
 
+#create the bad file peer    
+badPeer = Peer(666, 500, peers, tracker, [])
+peers[666] = badPeer
+
 
 
 for i in range(numberOfPeers):
     #peers[i] = Peer(i, random.randint(lowerBandwidth,higherBandwidth), peers, tracker, random.sample(torrentFileChunks, random.randint(0,fileNumberOfChunks - 1)))
-    peers[i] = Peer(i, random.randint(lowerBandwidth,higherBandwidth), peers, tracker, random.sample(torrentFileChunks,30))
+    peers[i] = Peer(i, random.randint(lowerBandwidth,higherBandwidth), peers, tracker, random.sample(torrentFileChunks,20))
 
 
 #peers[-1] = Peer(-1, 6, peers, tracker, torrentFileChunks[:5])
@@ -47,11 +52,11 @@ for peerIndex, peer in peers.items():
 
 rarestChunkRequestPeriod = 5
 topPeersRefreshPeriod = 10
-optimisticUnchokePeriod = 30
+optimisticUnchokePeriod = 100
 
 
 clearRequestBufferPeriod = 5000
-simulationTime = 2000
+simulationTime = 1000
 
 percentageTrackers = {}
 for peerIndex, peer in peers.items():
@@ -90,18 +95,19 @@ for t in range(1,simulationTime):
         percentage = peer.getDownloadPercentage()
         percentageTrackers[peerIndex].append(peer.getDownloadPercentage())
         #if peerIndex == 0:
-        peer.print()
+        #peer.print()
         #if (int(percentage) == 100) and (peer in tracker[1]):
         #     print("leaving!")
         #     peer.leaveTracker()
     #print("Press any key to continue...")
-    input()
+    #input()
         
-
 
 plt.figure()
 for peerIndex, peer in peers.items():
     plt.plot(np.array(percentageTrackers[peerIndex]), label = str(peerIndex) + "/" + str(peer.bandwidth))
 plt.legend()
+lines = plt.gca().get_lines()
+labelLines(lines, align=True)
 plt.show()
 

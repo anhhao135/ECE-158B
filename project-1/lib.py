@@ -59,14 +59,16 @@ class Peer:
         chunksHistogram = dict(sorted(chunksHistogram.items(), key=lambda item: item[1]))
         chunksSorted = list(chunksHistogram.keys())
         chunksCountsSorted = list(chunksHistogram.values())
-        if len(chunksSorted) != 0:
-            rarestChunks = []
-            minimumCount = chunksCountsSorted[0]
-            for i in range(len(chunksSorted)):
-                if chunksCountsSorted[i] == minimumCount:
-                    rarestChunks.append(chunksSorted[i])
-            random.shuffle(rarestChunks)
-            return rarestChunks[0]
+        while False:
+            if len(chunksSorted) != 0:
+                rarestChunks = []
+                minimumCount = chunksCountsSorted[0]
+                for i in range(len(chunksSorted)):
+                    if chunksCountsSorted[i] == minimumCount:
+                        rarestChunks.append(chunksSorted[i])
+                random.shuffle(rarestChunks)
+                return rarestChunks[0]
+        return chunksSorted
 
     def broadcastBandwidth(self):
         for peerID in self.top4Peers:
@@ -89,23 +91,18 @@ class Peer:
                 self.peers[peerID].receiveBuffer.append("hello from " + str(self.IPAddress))
 
     def requestRarestChunkFromPeers(self):
-        if self.currentlyRequestedChunk == None or self.currentlyRequestedChunk in self.acquiredChunks:
-            if self.currentlyRequestedChunk in self.acquiredChunks:
-                for trackerPeerID in self.tracker[1]:
-                        if trackerPeerID != self.IPAddress:
-                                chunkRequest = (self.IPAddress, self.currentlyRequestedChunk)
-                                if chunkRequest in self.peers[trackerPeerID].requestBuffer:
-                                    self.peers[trackerPeerID].requestBuffer.remove(chunkRequest)
-                                    
             if len(self.missingChunks) > 0:
-                rarestChunk = self.getRarestChunkType()
-                self.currentlyRequestedChunk = rarestChunk
-                chunkRequest = (self.IPAddress, rarestChunk)
-                for trackerPeerID in self.tracker[1]:
-                    if trackerPeerID != self.IPAddress:
-                        if rarestChunk in self.peers[trackerPeerID].acquiredChunks:
-                            if len(self.peers[trackerPeerID].requestBuffer) < REQUEST_BUFFER_SIZE:
-                                self.peers[trackerPeerID].requestBuffer.append(chunkRequest)
+                rarestChunks = (self.getRarestChunkType())[:10]
+                self.currentlyRequestedChunk = rarestChunks
+                for rarestChunk in rarestChunks:
+                    chunkRequest = (self.IPAddress, rarestChunk)
+                    for trackerPeerID in self.tracker[1]:
+                        #print(trackerPeerID)
+                        if trackerPeerID != self.IPAddress:
+                            if chunkRequest not in self.peers[trackerPeerID].requestBuffer:
+                                if rarestChunk in self.peers[trackerPeerID].acquiredChunks:
+                                    if len(self.peers[trackerPeerID].requestBuffer) < REQUEST_BUFFER_SIZE:
+                                        self.peers[trackerPeerID].requestBuffer.append(chunkRequest)
 
     
 
@@ -118,6 +115,13 @@ class Peer:
         for packet in self.receiveBuffer:
             self.downloadBandwidths[packet[0]] = packet[1]
             if packet[2] in self.missingChunks:
+
+                chunkRequest = (self.IPAddress, packet[2])
+                for trackerPeerID in self.tracker[1]:
+                        if trackerPeerID != self.IPAddress:
+                            if chunkRequest in self.peers[trackerPeerID].requestBuffer:
+                                self.peers[trackerPeerID].requestBuffer.remove(chunkRequest)
+                                
                 self.missingChunks.remove(packet[2])
                 self.acquiredChunks.append(packet[2])
         self.receiveBuffer = []
@@ -137,18 +141,22 @@ class Peer:
 
 
             if t % int((1 / sendBandwidth) * 1000) == 0:
+                print("here!!")
+                peersSentTo = []
                 sendCount = 0
                 remainingRequests = self.requestBuffer.copy()
                 #random.shuffle(self.requestBuffer)
                 for request in self.requestBuffer:
                     if (request[0] in self.topPeers or len(self.topPeers) == 0):
-                        self.sendChunkToPeer(request[1], sendBandwidth, request[0])
-                        remainingRequests.remove(request)
-                        sendCount = sendCount + 1
-                        if sendCount == NUM_TOP_PEERS:
-                            break
+                        if request[0] not in peersSentTo:
+                            peersSentTo.append(request[0])
+                            self.sendChunkToPeer(request[1], sendBandwidth, request[0])
+                            remainingRequests.remove(request)
+                            sendCount = sendCount + 1
+                            if sendCount == NUM_TOP_PEERS:
+                                break
                 self.requestBuffer = remainingRequests.copy()
-                #print(sendCount)
+                print(peersSentTo)
     
     def getDownloadPercentage(self):
         sourceFileChunkCount = len(self.torrentSourceChunks)
