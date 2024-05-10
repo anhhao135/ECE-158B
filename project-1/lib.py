@@ -55,9 +55,18 @@ class Peer:
                             chunksHistogram[chunk] = 1
                         else:
                             chunksHistogram[chunk] = chunksHistogram[chunk] + 1
-        chunksHistogram = list(dict(sorted(chunksHistogram.items(), key=lambda item: item[1])).keys())
-        if len(chunksHistogram) != 0:
-            return chunksHistogram[0]
+
+        chunksHistogram = dict(sorted(chunksHistogram.items(), key=lambda item: item[1]))
+        chunksSorted = list(chunksHistogram.keys())
+        chunksCountsSorted = list(chunksHistogram.values())
+        if len(chunksSorted) != 0:
+            rarestChunks = []
+            minimumCount = chunksCountsSorted[0]
+            for i in range(len(chunksSorted)):
+                if chunksCountsSorted[i] == minimumCount:
+                    rarestChunks.append(chunksSorted[i])
+            random.shuffle(rarestChunks)
+            return rarestChunks[0]
 
     def broadcastBandwidth(self):
         for peerID in self.top4Peers:
@@ -81,6 +90,13 @@ class Peer:
 
     def requestRarestChunkFromPeers(self):
         if self.currentlyRequestedChunk == None or self.currentlyRequestedChunk in self.acquiredChunks:
+            if self.currentlyRequestedChunk in self.acquiredChunks:
+                for trackerPeerID in self.tracker[1]:
+                        if trackerPeerID != self.IPAddress:
+                                chunkRequest = (self.IPAddress, self.currentlyRequestedChunk)
+                                if chunkRequest in self.peers[trackerPeerID].requestBuffer:
+                                    self.peers[trackerPeerID].requestBuffer.remove(chunkRequest)
+                                    
             if len(self.missingChunks) > 0:
                 rarestChunk = self.getRarestChunkType()
                 self.currentlyRequestedChunk = rarestChunk
@@ -90,6 +106,8 @@ class Peer:
                         if rarestChunk in self.peers[trackerPeerID].acquiredChunks:
                             if len(self.peers[trackerPeerID].requestBuffer) < REQUEST_BUFFER_SIZE:
                                 self.peers[trackerPeerID].requestBuffer.append(chunkRequest)
+
+    
 
     def sendChunkToPeer(self, chunk, bandwidth, peerIP):
         chunkPacket = (self.IPAddress, bandwidth, chunk)
@@ -107,6 +125,9 @@ class Peer:
     def sendChunksToTopPeers(self, t):
         requestCount = len(self.requestBuffer)
         if requestCount > 0:
+
+            random.shuffle(self.requestBuffer)
+
             sendBandwidth = int(self.bandwidth / NUM_TOP_PEERS) 
 
             if requestCount >= NUM_TOP_PEERS:
@@ -114,16 +135,8 @@ class Peer:
             else:
                 sendBandwidth = int(self.bandwidth / requestCount)
 
-            if self.IPAddress == -1:
-                print("here")
-                print(sendBandwidth)
 
             if t % int((1 / sendBandwidth) * 1000) == 0:
-                print("sending!")
-                print(requestCount)
-                print(self.bandwidth)
-                print(sendBandwidth)
-                print(self.IPAddress)
                 sendCount = 0
                 remainingRequests = self.requestBuffer.copy()
                 #random.shuffle(self.requestBuffer)

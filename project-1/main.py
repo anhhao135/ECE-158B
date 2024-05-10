@@ -4,10 +4,10 @@ import numpy as np
 
 lowerBandwidth = 10
 higherBandwidth = 1000
-numberOfPeers = 20
+numberOfPeers = 5
 peers = {}
 
-fileNumberOfChunks = 100
+fileNumberOfChunks = 50
 torrentFileChunks = []
 for i in range(fileNumberOfChunks):
     chunk = str(i)
@@ -20,13 +20,11 @@ tracker = (torrentFileChunks, []) #tracker is tuple of (file size in chunks, lis
 #sourcePeer = Peer(-1, higherBandwidth, peers, tracker, torrentFileChunks)
 #peers[-1] = sourcePeer
 
+
+
 for i in range(numberOfPeers):
     #peers[i] = Peer(i, random.randint(lowerBandwidth,higherBandwidth), peers, tracker, random.sample(torrentFileChunks, random.randint(0,fileNumberOfChunks - 1)))
-    peers[i] = Peer(i, random.randint(lowerBandwidth,higherBandwidth), peers, tracker, random.sample(torrentFileChunks,10))
-
-for peerIndex, peer in peers.items():
-    peer.joinTracker()
-    peer.updateMissingChunks()
+    peers[i] = Peer(i, random.randint(lowerBandwidth,higherBandwidth), peers, tracker, random.sample(torrentFileChunks,30))
 
 
 #peers[-1] = Peer(-1, 6, peers, tracker, torrentFileChunks[:5])
@@ -35,11 +33,12 @@ for peerIndex, peer in peers.items():
 #peers[2] = Peer(2, 10, peers, tracker, torrentFileChunks[:])
 #peers[3] = Peer(3, 10, peers, tracker, [])
 
-#peers[-1] = Peer(-1, 50, peers, tracker, torrentFileChunks[:5])
-#peers[0] = Peer(0, 50, peers, tracker, torrentFileChunks[5:10])
-#peers[1] = Peer(1, 50, peers, tracker, torrentFileChunks[10:15])
-#peers[2] = Peer(2, 50, peers, tracker, torrentFileChunks[15:20])
-#peers[3] = Peer(3, 10, peers, tracker, torrentFileChunks[20:25])
+#peers[-1] = Peer(-1, 1000, peers, tracker, torrentFileChunks[:25])
+#peers[0] = Peer(0, 1000, peers, tracker, torrentFileChunks[23:])
+#peers[1] = Peer(1, 100, peers, tracker, torrentFileChunks[10:17])
+#peers[2] = Peer(2, 1000, peers, tracker, torrentFileChunks[15:22])
+#peers[3] = Peer(3, 200, peers, tracker, torrentFileChunks[20:])
+#peers[4] = Peer(4, 10, peers, tracker, torrentFileChunks[:10])
 
 
 for peerIndex, peer in peers.items():
@@ -47,13 +46,12 @@ for peerIndex, peer in peers.items():
     peer.updateMissingChunks()
 
 rarestChunkRequestPeriod = 5
-topPeersRefreshPeriod = 50
-optimisticUnchokePeriod = 150
-
+topPeersRefreshPeriod = 10
+optimisticUnchokePeriod = 30
 
 
 clearRequestBufferPeriod = 5000
-simulationTime = 10000
+simulationTime = 2000
 
 percentageTrackers = {}
 for peerIndex, peer in peers.items():
@@ -61,9 +59,9 @@ for peerIndex, peer in peers.items():
 
 for t in range(1,simulationTime):
 
-    l = list(peers.items())
-    random.shuffle(l)
-    peers = dict(l)
+    #l = list(peers.items())
+    #random.shuffle(l)
+    #peers = dict(l)
 
     print(t)
 
@@ -92,12 +90,12 @@ for t in range(1,simulationTime):
         percentage = peer.getDownloadPercentage()
         percentageTrackers[peerIndex].append(peer.getDownloadPercentage())
         #if peerIndex == 0:
-        #peer.print()
+        peer.print()
         #if (int(percentage) == 100) and (peer in tracker[1]):
         #     print("leaving!")
         #     peer.leaveTracker()
     #print("Press any key to continue...")
-    #input()
+    input()
         
 
 
