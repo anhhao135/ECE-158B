@@ -3,9 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from labellines import labelLines
 
-lowerBandwidth = 2
-higherBandwidth = 1000
-numberOfPeers = 20
+numberOfPeers = 150
 peers = {}
 
 fileNumberOfChunks = 200
@@ -18,18 +16,18 @@ tracker = (torrentFileChunks, []) #tracker is tuple of (file size in chunks, lis
 
 
 #create the source file peer    
-#sourcePeer = Peer(-1, higherBandwidth, peers, tracker, torrentFileChunks)
-#peers[-1] = sourcePeer
+sourcePeer = Peer(-1, HIGH_BANDWIDTH, peers, tracker, torrentFileChunks)
+peers[-1] = sourcePeer
 
 #create the bad file peer    
-badPeer = Peer(666, 500, peers, tracker, [])
+badPeer = Peer(666, LOW_BANDWIDTH, peers, tracker, [])
 peers[666] = badPeer
 
 
 
 for i in range(numberOfPeers):
     #peers[i] = Peer(i, random.randint(lowerBandwidth,higherBandwidth), peers, tracker, random.sample(torrentFileChunks, random.randint(0,fileNumberOfChunks - 1)))
-    peers[i] = Peer(i, random.randint(lowerBandwidth,higherBandwidth), peers, tracker, random.sample(torrentFileChunks,20))
+    peers[i] = Peer(i, random.randint(LOW_BANDWIDTH,HIGH_BANDWIDTH), peers, tracker, random.sample(torrentFileChunks,20))
 
 
 #peers[-1] = Peer(-1, 6, peers, tracker, torrentFileChunks[:5])
@@ -45,54 +43,68 @@ for i in range(numberOfPeers):
 #peers[3] = Peer(3, 200, peers, tracker, torrentFileChunks[20:])
 #peers[4] = Peer(4, 10, peers, tracker, torrentFileChunks[:10])
 
-
 for peerIndex, peer in peers.items():
     peer.joinTracker()
-    peer.updateMissingChunks()
+    #peer.updateMissingChunks()
 
 rarestChunkRequestPeriod = 5
 topPeersRefreshPeriod = 10
 optimisticUnchokePeriod = 100
-
-
-clearRequestBufferPeriod = 5000
 simulationTime = 1000
+
+finisherBandwidths = []
+finisherIPs = []
 
 percentageTrackers = {}
 for peerIndex, peer in peers.items():
     percentageTrackers[peerIndex] = []
 
-for t in range(1,simulationTime):
+for t in range(0,simulationTime):
+
+    #if t == int(100):
+    #    peers[-1].leaveTracker()
+
+    #if t == int(1000):
+    #    peers[-1].joinTracker()
 
     #l = list(peers.items())
     #random.shuffle(l)
     #peers = dict(l)
 
+    #random.shuffle(tracker[1])
+
     print(t)
 
-    for peerIndex, peer in peers.items():
-        peer.requestRarestChunkFromPeers()
+    if t % rarestChunkRequestPeriod == 0:
+        for peerIndex in tracker[1]:
+            peers[peerIndex].requestRarestChunkFromPeers()
 
-    for peerIndex, peer in peers.items():
-        peer.sendChunksToTopPeers(t)
+    for peerIndex in tracker[1]:
+        peers[peerIndex].sendChunksToTopPeers(t)
+
+    for peerIndex in tracker[1]:
+        peers[peerIndex].processReceiveBuffer()
     
     for peerIndex, peer in peers.items():
         peer.processReceiveBuffer()
 
     if t % topPeersRefreshPeriod == 0:
-            for peerIndex, peer in peers.items():
-                peer.refreshTopPeers()
+        for peerIndex in tracker[1]:
+            peers[peerIndex].refreshTopPeers()
 
     if t % optimisticUnchokePeriod == 0:
-            for peerIndex, peer in peers.items():
-                peer.optimisticallyUnchokePeer()
-    if t % clearRequestBufferPeriod == 0:
-            for peerIndex, peer in peers.items():
-                peer.clearRequestBuffer()
-
+            for peerIndex in tracker[1]:
+                peers[peerIndex].optimisticallyUnchokePeer()
 
     for peerIndex, peer in peers.items():
         percentage = peer.getDownloadPercentage()
+        if percentage == 100:
+            if peerIndex not in finisherIPs:
+                finisherIPs.append(peerIndex)
+                finisherBandwidths.append(peer.bandwidth)
+                if peerIndex != -1:
+                    peer.leaveTracker()
+
         percentageTrackers[peerIndex].append(peer.getDownloadPercentage())
         #if peerIndex == 0:
         #peer.print()
@@ -102,12 +114,17 @@ for t in range(1,simulationTime):
     #print("Press any key to continue...")
     #input()
         
-
+print(finisherBandwidths)
 plt.figure()
 for peerIndex, peer in peers.items():
     plt.plot(np.array(percentageTrackers[peerIndex]), label = str(peerIndex) + "/" + str(peer.bandwidth))
 plt.legend()
 lines = plt.gca().get_lines()
 labelLines(lines, align=True)
+
+plt.figure()
+plt.plot(finisherBandwidths)
+
 plt.show()
+
 
