@@ -2,8 +2,9 @@ from lib import *
 import matplotlib.pyplot as plt
 import numpy as np
 from labellines import labelLines
+from tqdm import tqdm
 
-numberOfPeers = 150
+numberOfPeers = 100
 peers = {}
 
 fileNumberOfChunks = 200
@@ -16,8 +17,8 @@ tracker = (torrentFileChunks, []) #tracker is tuple of (file size in chunks, lis
 
 
 #create the source file peer    
-sourcePeer = Peer(-1, HIGH_BANDWIDTH, peers, tracker, torrentFileChunks)
-peers[-1] = sourcePeer
+#sourcePeer = Peer(-1, HIGH_BANDWIDTH, peers, tracker, torrentFileChunks)
+#peers[-1] = sourcePeer
 
 #create the bad file peer    
 badPeer = Peer(666, LOW_BANDWIDTH, peers, tracker, [])
@@ -48,9 +49,9 @@ for peerIndex, peer in peers.items():
     #peer.updateMissingChunks()
 
 rarestChunkRequestPeriod = 5
-topPeersRefreshPeriod = 10
-optimisticUnchokePeriod = 100
-simulationTime = 1000
+topPeersRefreshPeriod = 50
+optimisticUnchokePeriod = 2000
+simulationTime = 5000
 
 finisherBandwidths = []
 finisherIPs = []
@@ -59,7 +60,7 @@ percentageTrackers = {}
 for peerIndex, peer in peers.items():
     percentageTrackers[peerIndex] = []
 
-for t in range(0,simulationTime):
+for t in tqdm(range(0,simulationTime)):
 
     #if t == int(100):
     #    peers[-1].leaveTracker()
@@ -73,17 +74,18 @@ for t in range(0,simulationTime):
 
     #random.shuffle(tracker[1])
 
-    print(t)
+    #print(t)
 
     if t % rarestChunkRequestPeriod == 0:
         for peerIndex in tracker[1]:
             peers[peerIndex].requestRarestChunkFromPeers()
 
     for peerIndex in tracker[1]:
-        peers[peerIndex].sendChunksToTopPeers(t)
+        peers[peerIndex].processReceiveBuffer()
 
     for peerIndex in tracker[1]:
-        peers[peerIndex].processReceiveBuffer()
+        peers[peerIndex].sendChunksToTopPeers(t)
+
     
     for peerIndex, peer in peers.items():
         peer.processReceiveBuffer()
@@ -124,6 +126,10 @@ labelLines(lines, align=True)
 
 plt.figure()
 plt.plot(finisherBandwidths)
+
+plt.figure()
+plt.plot(np.array(percentageTrackers[666]))
+plt.legend()
 
 plt.show()
 

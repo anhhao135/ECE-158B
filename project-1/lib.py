@@ -41,6 +41,14 @@ class Peer:
     def optimisticallyUnchokePeer(self):
         if len(self.topPeers) > 0:
             notTopPeers = list(set(self.tracker[1]).difference(self.topPeers))
+            notTopPeersValid = []
+            for notTopPeer in notTopPeers:
+                for request in self.requestBuffer:
+                    if request[0] == notTopPeer and notTopPeer not in notTopPeersValid:
+                        notTopPeersValid.append(notTopPeer)
+            notTopPeers = notTopPeersValid
+            if len(notTopPeers) == 0:
+                return 0
             randomPeerIndex = random.randint(0, len(notTopPeers) - 1)
             randomlyPickedPeer = notTopPeers[randomPeerIndex]
             topPeerRandomReplaceIndex = random.randint(0, NUM_TOP_PEERS - 1)
@@ -89,7 +97,7 @@ class Peer:
                     if currentlyRequestedChunk not in self.acquiredChunks:
                         return 0
             if len(self.missingChunks) > 0:
-                rarestChunks = (self.getRarestChunkType())[:10]
+                rarestChunks = (self.getRarestChunkType())[:3]
                 self.currentlyRequestedChunk = rarestChunks
                 for rarestChunk in rarestChunks:
                     chunkRequest = (self.IPAddress, rarestChunk)
@@ -112,7 +120,6 @@ class Peer:
         for packet in self.receiveBuffer:
             self.downloadBandwidths[packet[0]] = packet[1]
             if packet[2] in self.missingChunks:
-
                 chunkRequest = (self.IPAddress, packet[2])
                 for trackerPeerID in self.tracker[1]:
                         if trackerPeerID != self.IPAddress:
