@@ -25,10 +25,10 @@ peers[-1].joinTracker(0) #join the tracker before the simulation starts
 
 
 for i in range(NUM_PEERS): #we create the other peers of the torrent0
-    peers[i] = Peer(i, random.randint(LOW_BANDWIDTH,HIGH_BANDWIDTH), peers, tracker, [])
-    peers[i].joinTracker(0)
+    peers[i] = Peer(i, random.randint(LOW_BANDWIDTH,HIGH_BANDWIDTH), peers, tracker, random.sample(torrentFileChunks, 50))
+    #peers[i] = Peer(i, int(HIGH_BANDWIDTH / 10), peers, tracker, [])
+    #peers[i].joinTracker(0)
     #each peer will have a randomly selected bandwidth from a low to high range, and no chunks acquired to start with
-
 finisherBandwidths = []
 finisherIPs = []
 
@@ -40,16 +40,22 @@ rateTrackers = {}
 for peerIndex, peer in peers.items():
     rateTrackers[peerIndex] = []
 
+peerJoinTracker = 0
+
 for t in tqdm(range(0,SIMULATION_TIME)):
 
-    #if t == int(0):
+    random.shuffle(tracker[1])
+
+    if t % 200 == 0 and peerJoinTracker < NUM_PEERS:
+        peers[peerJoinTracker].joinTracker(t)
+        peerJoinTracker = peerJoinTracker + 1
+
+
+    #if t == int(1500):
     #    peers[-1].joinTracker(t)
 
-    #if t == int(3000):
-    #    peers[-1].joinTracker(t)
-
-    #if t == int(500):
-    #    peers[-1].leaveTracker()
+    #if t == int(1500):
+        #peers[-1].leaveTracker()
 
     #l = list(peers.items())
     #random.shuffle(l)
@@ -106,12 +112,15 @@ for t in tqdm(range(0,SIMULATION_TIME)):
 
 plt.figure()
 for peerIndex, peer in peers.items():
-    if peerIndex != -1 and peerIndex < NUM_PEERS_PLOT:
+    if NUM_PEERS < 20 and peerIndex != -1:
+        plt.plot(np.array(percentageTrackers[peerIndex]), label = "IP: " + str(peerIndex) + "|Bandwidth: " + str(peer.bandwidth))
+    elif peerIndex != -1 and peerIndex % NUM_PEERS_PLOT == 0:
         plt.plot(np.array(percentageTrackers[peerIndex]), label = "IP: " + str(peerIndex) + "|Bandwidth: " + str(peer.bandwidth))
 plt.legend()
 plt.title("Peer Download Percentage Over Time")
 plt.xlabel("Time")
 plt.ylabel("Download %")
+plt.ylim(0, 105)
 #lines = plt.gca().get_lines()
 #labelLines(lines, align=True)
 
@@ -131,14 +140,16 @@ plt.legend()
 plt.title("Peer Download Percentage Over Time")
 plt.xlabel("Time")
 plt.ylabel("Download %")
-
-#plt.figure()
-#plt.plot(np.array(percentageTrackers[666]))
-#plt.legend()
+plt.ylim(0, 105)
 
 
-#plt.figure()
-#plt.plot(rateTrackers[10])
+plt.figure()
+plt.title("Peer 5 Effective Download Rate Over Time")
+plt.xlabel("Time x 100")
+plt.ylabel("Chunks / Time Unit")
+plt.plot(rateTrackers[5])
+
+
 
 plt.show()
 
