@@ -4,54 +4,30 @@ import numpy as np
 from labellines import labelLines
 from tqdm import tqdm
 
-numberOfPeers = 100
-peers = {}
+#BitTorrent simulator for ECE 158B SP24 project 1
+#Hao Le A15547504
 
-fileNumberOfChunks = 200
+peers = {} #use dictionary to define peer list where index is the peer's IP address, and the returned object is of Peer class   
+
+#create the torrent source file chunks, just a list of incrementing strings of numbers up to the specified chunk amount
 torrentFileChunks = []
-for i in range(fileNumberOfChunks):
+for i in range(NUM_CHUNKS):
     chunk = str(i)
     torrentFileChunks.append(chunk)
 
-tracker = (torrentFileChunks, []) #tracker is tuple of (file size in chunks, list of peer IDs)
+tracker = (torrentFileChunks, []) #torrent tracker is tuple of (list of complete source file chunks, list of peer IDs)
+#any peer part of the tracker can view other peers participating in the torrent as well as what the source file's chunks are - this is to compare with its own acquired chunks and discern what is missing
+
+#the first peer we make is the source peer that seeds the original chunks of the file to the network
+peers[-1] = Peer(-1, HIGH_BANDWIDTH, peers, tracker, torrentFileChunks)
+peers[-1].joinTracker(0) #join the tracker before the simulation starts
+#the source peer has IP address -1, has the highest possible bandwidth, and all the source file chunks already acquired
 
 
-#create the source file peer    
-#sourcePeer = Peer(-1, HIGH_BANDWIDTH, peers, tracker, torrentFileChunks)
-#peers[-1] = sourcePeer
-
-#create the bad file peer    
-badPeer = Peer(666, LOW_BANDWIDTH, peers, tracker, [])
-peers[666] = badPeer
-
-
-
-for i in range(numberOfPeers):
-    #peers[i] = Peer(i, random.randint(lowerBandwidth,higherBandwidth), peers, tracker, random.sample(torrentFileChunks, random.randint(0,fileNumberOfChunks - 1)))
-    peers[i] = Peer(i, random.randint(LOW_BANDWIDTH,HIGH_BANDWIDTH), peers, tracker, random.sample(torrentFileChunks,20))
-
-
-#peers[-1] = Peer(-1, 6, peers, tracker, torrentFileChunks[:5])
-#peers[0] = Peer(0, 9, peers, tracker, torrentFileChunks[4:10])
-#peers[1] = Peer(1, 50, peers, tracker, torrentFileChunks[8:])
-#peers[2] = Peer(2, 10, peers, tracker, torrentFileChunks[:])
-#peers[3] = Peer(3, 10, peers, tracker, [])
-
-#peers[-1] = Peer(-1, 1000, peers, tracker, torrentFileChunks[:25])
-#peers[0] = Peer(0, 1000, peers, tracker, torrentFileChunks[23:])
-#peers[1] = Peer(1, 100, peers, tracker, torrentFileChunks[10:17])
-#peers[2] = Peer(2, 1000, peers, tracker, torrentFileChunks[15:22])
-#peers[3] = Peer(3, 200, peers, tracker, torrentFileChunks[20:])
-#peers[4] = Peer(4, 10, peers, tracker, torrentFileChunks[:10])
-
-for peerIndex, peer in peers.items():
-    peer.joinTracker()
-    #peer.updateMissingChunks()
-
-rarestChunkRequestPeriod = 5
-topPeersRefreshPeriod = 50
-optimisticUnchokePeriod = 2000
-simulationTime = 5000
+for i in range(NUM_PEERS): #we create the other peers of the torrent0
+    peers[i] = Peer(i, random.randint(LOW_BANDWIDTH,HIGH_BANDWIDTH), peers, tracker, [])
+    peers[i].joinTracker(0)
+    #each peer will have a randomly selected bandwidth from a low to high range, and no chunks acquired to start with
 
 finisherBandwidths = []
 finisherIPs = []
@@ -60,23 +36,28 @@ percentageTrackers = {}
 for peerIndex, peer in peers.items():
     percentageTrackers[peerIndex] = []
 
-for t in tqdm(range(0,simulationTime)):
+rateTrackers = {}
+for peerIndex, peer in peers.items():
+    rateTrackers[peerIndex] = []
 
-    #if t == int(100):
+for t in tqdm(range(0,SIMULATION_TIME)):
+
+    #if t == int(0):
+    #    peers[-1].joinTracker(t)
+
+    #if t == int(3000):
+    #    peers[-1].joinTracker(t)
+
+    #if t == int(500):
     #    peers[-1].leaveTracker()
-
-    #if t == int(1000):
-    #    peers[-1].joinTracker()
 
     #l = list(peers.items())
     #random.shuffle(l)
     #peers = dict(l)
 
-    #random.shuffle(tracker[1])
-
     #print(t)
 
-    if t % rarestChunkRequestPeriod == 0:
+    if t % RAREST_CHUNK_REQUEST_PERIOD == 0:
         for peerIndex in tracker[1]:
             peers[peerIndex].requestRarestChunkFromPeers()
 
@@ -90,13 +71,15 @@ for t in tqdm(range(0,simulationTime)):
     for peerIndex, peer in peers.items():
         peer.processReceiveBuffer()
 
-    if t % topPeersRefreshPeriod == 0:
+    if t % TOP_PEERS_REFRESH_PERIOD == 0:
         for peerIndex in tracker[1]:
             peers[peerIndex].refreshTopPeers()
 
-    if t % optimisticUnchokePeriod == 0:
+    if t % OPTIMISTIC_UNCHOKE_PERIOD == 0:
             for peerIndex in tracker[1]:
                 peers[peerIndex].optimisticallyUnchokePeer()
+
+
 
     for peerIndex, peer in peers.items():
         percentage = peer.getDownloadPercentage()
@@ -104,10 +87,13 @@ for t in tqdm(range(0,simulationTime)):
             if peerIndex not in finisherIPs:
                 finisherIPs.append(peerIndex)
                 finisherBandwidths.append(peer.bandwidth)
-                if peerIndex != -1:
+                if peerIndex != -1 and LEAVE_WHEN_DONE:
                     peer.leaveTracker()
 
-        percentageTrackers[peerIndex].append(peer.getDownloadPercentage())
+        percentageTrackers[peerIndex].append(percentage)
+        if (t % DOWNLOAD_RATE_WINDOW == 0):
+            rate = peer.getDownloadRate(t)
+            rateTrackers[peerIndex].append(rate)
         #if peerIndex == 0:
         #peer.print()
         #if (int(percentage) == 100) and (peer in tracker[1]):
@@ -115,21 +101,44 @@ for t in tqdm(range(0,simulationTime)):
         #     peer.leaveTracker()
     #print("Press any key to continue...")
     #input()
-        
-print(finisherBandwidths)
+
+
+
 plt.figure()
 for peerIndex, peer in peers.items():
-    plt.plot(np.array(percentageTrackers[peerIndex]), label = str(peerIndex) + "/" + str(peer.bandwidth))
+    if peerIndex != -1 and peerIndex < NUM_PEERS_PLOT:
+        plt.plot(np.array(percentageTrackers[peerIndex]), label = "IP: " + str(peerIndex) + "|Bandwidth: " + str(peer.bandwidth))
 plt.legend()
-lines = plt.gca().get_lines()
-labelLines(lines, align=True)
+plt.title("Peer Download Percentage Over Time")
+plt.xlabel("Time")
+plt.ylabel("Download %")
+#lines = plt.gca().get_lines()
+#labelLines(lines, align=True)
+
 
 plt.figure()
 plt.plot(finisherBandwidths)
+plt.title("Finishing Order vs. Peer Upload Bandwidth")
+plt.xlabel("Finishing Order")
+plt.ylabel("Upload Bandwidth")
+
 
 plt.figure()
-plt.plot(np.array(percentageTrackers[666]))
+for peerIndex, peer in peers.items():
+    if peerIndex != -1:
+        plt.plot(np.array(percentageTrackers[peerIndex]))
 plt.legend()
+plt.title("Peer Download Percentage Over Time")
+plt.xlabel("Time")
+plt.ylabel("Download %")
+
+#plt.figure()
+#plt.plot(np.array(percentageTrackers[666]))
+#plt.legend()
+
+
+#plt.figure()
+#plt.plot(rateTrackers[10])
 
 plt.show()
 

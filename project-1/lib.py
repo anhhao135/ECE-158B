@@ -1,10 +1,26 @@
 import random
 from natsort import natsorted
 
+#variables to define the BitTorrent protocol behavior
 NUM_TOP_PEERS = 4
 REQUEST_BUFFER_SIZE = 500
+RAREST_CHUNK_REQUEST_PERIOD = 5
+TOP_PEERS_REFRESH_PERIOD = 10
+OPTIMISTIC_UNCHOKE_PERIOD = 100
+CLEAR_BUFFER_PERIOD = 500
+
+#variables to define the simulation
 HIGH_BANDWIDTH = 1000
 LOW_BANDWIDTH = 20
+NUM_PEERS = 100
+SIMULATION_TIME = 5000
+NUM_CHUNKS = 200
+DOWNLOAD_RATE_WINDOW = 50
+
+
+NUM_PEERS_PLOT = 20
+LEAVE_WHEN_DONE = False
+
 
 class Peer:
     def __init__(self, IPAddress, bandwidth, peers, tracker, acquiredChunks):
@@ -21,6 +37,11 @@ class Peer:
         self.uploadBandwidths = {}
         self.topPeers = []
         self.currentlyRequestedChunk = None
+        self.timeJoinTracker = 0
+        self.trackerPeerCount = 0
+        
+        self.numAcquiredChunksBefore = 0
+        self.timeAcquiredChunksBefore = 0
 
     def refreshTopPeers(self):
         if len(self.downloadBandwidths) >= NUM_TOP_PEERS:
@@ -75,10 +96,11 @@ class Peer:
             self.peers[peerID].downloadBandwidths[self.IPAddress] = self.bandwidth / 4
             self.uploadBandwidths[peerID] = self.bandwidth / 4
 
-    def joinTracker(self):
+    def joinTracker(self, t):
         self.tracker[1].append(self.IPAddress)
         self.torrentSourceChunks = self.tracker[0]
         self.updateMissingChunks()
+        self.timeJoinTracker = t
     
     def leaveTracker(self):
         self.tracker[1].remove(self.IPAddress)
@@ -92,22 +114,22 @@ class Peer:
                 self.peers[peerID].receiveBuffer.append("hello from " + str(self.IPAddress))
 
     def requestRarestChunkFromPeers(self):
-            if self.currentlyRequestedChunk != None:
-                for currentlyRequestedChunk in self.currentlyRequestedChunk:
-                    if currentlyRequestedChunk not in self.acquiredChunks:
-                        return 0
-            if len(self.missingChunks) > 0:
-                rarestChunks = (self.getRarestChunkType())[:3]
-                self.currentlyRequestedChunk = rarestChunks
-                for rarestChunk in rarestChunks:
-                    chunkRequest = (self.IPAddress, rarestChunk)
-                    for trackerPeerID in self.tracker[1]:
-                        if trackerPeerID != self.IPAddress:
-                            if chunkRequest not in self.peers[trackerPeerID].requestBuffer:
-                                if rarestChunk in self.peers[trackerPeerID].acquiredChunks:
-                                    if len(self.peers[trackerPeerID].requestBuffer) < REQUEST_BUFFER_SIZE:
-                                        self.peers[trackerPeerID].requestBuffer.append(chunkRequest)
-                                        #break
+        if self.currentlyRequestedChunk != None and not len(self.tracker[1]) != self.trackerPeerCount:
+            for currentlyRequestedChunk in self.currentlyRequestedChunk:
+                if currentlyRequestedChunk not in self.acquiredChunks:
+                    return 0
+        if len(self.missingChunks) > 0:
+            rarestChunks = (self.getRarestChunkType())[:NUM_TOP_PEERS]
+            self.currentlyRequestedChunk = rarestChunks
+            for rarestChunk in rarestChunks:
+                chunkRequest = (self.IPAddress, rarestChunk)
+                for trackerPeerID in self.tracker[1]:
+                    if trackerPeerID != self.IPAddress:
+                        if chunkRequest not in self.peers[trackerPeerID].requestBuffer:
+                            if rarestChunk in self.peers[trackerPeerID].acquiredChunks:
+                                if len(self.peers[trackerPeerID].requestBuffer) < REQUEST_BUFFER_SIZE:
+                                    self.peers[trackerPeerID].requestBuffer.append(chunkRequest)
+        self.trackerPeerCount = len(self.tracker[1])
 
     
 
@@ -161,12 +183,25 @@ class Peer:
                 self.requestBuffer = remainingRequests.copy()
     
     def getDownloadPercentage(self):
+        
+        if self.torrentSourceChunks == None:
+            return 0
         sourceFileChunkCount = len(self.torrentSourceChunks)
         acquiredChunkCount = len(self.acquiredChunks)
 
         if sourceFileChunkCount > 0:
             percentage = (acquiredChunkCount / sourceFileChunkCount) * 100
             return percentage
+        
+    def getDownloadRate(self, t):
+        if self.timeAcquiredChunksBefore == 0 or self.numAcquiredChunksBefore == 0:
+            rate = 0
+        else:
+            rate = (len(self.acquiredChunks) - self.numAcquiredChunksBefore) / ((t - self.timeAcquiredChunksBefore))
+        
+        self.timeAcquiredChunksBefore = t
+        self.numAcquiredChunksBefore = len(self.acquiredChunks)
+        return rate
 
     def print(self):
         print("--------")
