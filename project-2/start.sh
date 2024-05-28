@@ -1,0 +1,1 @@
+sudo mn --custom fattree.py --topo fattree --switch ovsk,failMode=standalone,stp=1
