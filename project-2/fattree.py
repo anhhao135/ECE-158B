@@ -35,30 +35,30 @@ class FatTree( Topo ):
 		hr4 = self.addHost('hr4') #host C
 
 		#add edge switches
-		s3001 = self.addSwitch('s3001')
-		s3002 = self.addSwitch('s3002')
-		s3003 = self.addSwitch('s3003')
-		s3004 = self.addSwitch('s3004')
-		s3005 = self.addSwitch('s3005')
-		s3006 = self.addSwitch('s3006')
-		s3007 = self.addSwitch('s3007')
-		s3008 = self.addSwitch('s3008')
+		s3001 = self.addSwitch('s3001', stp=True)
+		s3002 = self.addSwitch('s3002', stp=True)
+		s3003 = self.addSwitch('s3003', stp=True)
+		s3004 = self.addSwitch('s3004', stp=True)
+		s3005 = self.addSwitch('s3005', stp=True)
+		s3006 = self.addSwitch('s3006', stp=True)
+		s3007 = self.addSwitch('s3007', stp=True)
+		s3008 = self.addSwitch('s3008', stp=True)
 
 		#add aggregation switches
-		s2001 = self.addSwitch('s2001')
-		s2002 = self.addSwitch('s2002')
-		s2003 = self.addSwitch('s2003')
-		s2004 = self.addSwitch('s2004')
-		s2005 = self.addSwitch('s2005')
-		s2006 = self.addSwitch('s2006')
-		s2007 = self.addSwitch('s2007')
-		s2008 = self.addSwitch('s2008')
+		s2001 = self.addSwitch('s2001', stp=True)
+		s2002 = self.addSwitch('s2002', stp=True)
+		s2003 = self.addSwitch('s2003', stp=True)
+		s2004 = self.addSwitch('s2004', stp=True)
+		s2005 = self.addSwitch('s2005', stp=True)
+		s2006 = self.addSwitch('s2006', stp=True)
+		s2007 = self.addSwitch('s2007', stp=True)
+		s2008 = self.addSwitch('s2008', stp=True)
 
 		#add core switches
-		s1001 = self.addSwitch('s1001')
-		s1002 = self.addSwitch('s1002')
-		s1003 = self.addSwitch('s1003')
-		s1004 = self.addSwitch('s1004')
+		s1001 = self.addSwitch('s1001', stp=True)
+		s1002 = self.addSwitch('s1002', stp=True)
+		s1003 = self.addSwitch('s1003', stp=True)
+		s1004 = self.addSwitch('s1004', stp=True)
 
 		#edge to host links
 		self.addLink(s3001, hb1, bw=BW, delay=DELAY)
