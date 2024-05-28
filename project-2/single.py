@@ -9,7 +9,7 @@ from mininet.cli import CLI
 from mininet.log import lg, info
 from mininet.net import Mininet
 from mininet.node import OVSKernelSwitch
-from mininet.topolib import SingleSwitchTopo
+from mininet.topo import SingleSwitchTopo
 
 def ifconfigTest( net ):
     "Run ifconfig on all hosts in net."
