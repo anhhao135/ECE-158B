@@ -14,6 +14,15 @@ DELAY = '1ms'
 BW = 100
  
 
+def pingTest(net):
+    info("Ping test\n")
+    hb1 = net.getNodeByName('hb1')
+    pingStart = time.time()
+    info(hb1.cmd('ping 10.0.0.5 -c 10'))
+    pingEnd = time.time()
+    info("Ping took: " + str(pingEnd - pingStart) + " seconds.")
+
+
 if __name__ == '__main__':
     intf = custom(TCIntf, bw=BW, delay=DELAY)
     lg.setLogLevel( 'info' )
@@ -22,6 +31,7 @@ if __name__ == '__main__':
     network = Mininet(FatTree(), intf=intf, waitConnected=True)
 
     network.start()
+    pingTest(network)
     #network.pingAll()
 
     CLI( network )
