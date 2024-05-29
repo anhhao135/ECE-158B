@@ -12,7 +12,7 @@ from mininet.cli import CLI
 
 DELAY = '1ms'
 BW = 100
-PING_COUNT = 10
+PING_COUNT = 20
  
 
 def pingTest(net):
@@ -27,11 +27,17 @@ def iPerfTest(net):
     info("iPerf test\n")
     hb1, hg1 = net.getNodeByName('hb1', 'hg1')
     hg1.cmd('iperf -s &')
-    pingStart = time.time()
+    iPerfStart = time.time()
     info(hb1.cmd('iperf -c 10.0.0.5 -n 100M'))
-    pingEnd = time.time()
-    info("100MB iPerf took: " + str(pingEnd - pingStart) + " seconds.\n")
+    iPerfEnd = time.time()
+    info("100MB iPerf took: " + str(iPerfEnd - iPerfStart) + " seconds.\n")
 
+def elephantAndMiceTest(net):
+    info("Elephant and mice test\n")
+    hb1, hg1 = net.getNodeByName('hb1', 'hg1')
+    hg1.cmd('iperf -s &')
+    hb1.cmd('ping 10.0.0.5 -c ' + str(PING_COUNT) + ' > ping.txt &')
+    hb1.cmd('iperf -c 10.0.0.5 -n 100M > iperf.txt &')
 
 if __name__ == '__main__':
     intf = custom(TCIntf, bw=BW, delay=DELAY)
@@ -46,6 +52,7 @@ if __name__ == '__main__':
 
     pingTest(network)
     iPerfTest(network)
+    elephantAndMiceTest(network)
     #network.pingAll()
 
     CLI( network )
