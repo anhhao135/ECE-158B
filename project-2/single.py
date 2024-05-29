@@ -12,6 +12,7 @@ from mininet.node import OVSKernelSwitch
 from mininet.topo import SingleSwitchTopo
 from mininet.link import TCIntf
 from mininet.util import custom
+import time
 
 BW = 100
 DELAY = '1ms'
@@ -33,8 +34,9 @@ def iPerfSimultaneousTest(net):
     for host in hosts:
         info(host.cmd('ifconfig'))
         info(host.cmd('iperf -s &'))
-    for host in hosts:
-        info(host.cmd('iperf -c h4'))
+    time.sleep(1)
+    h1, h2, h3, h4 = net.getNodeByName('h1', 'h2', 'h3', 'h4')
+    info(h1.cmd('iperf -c h4'))
 
     
 
