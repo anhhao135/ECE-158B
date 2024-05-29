@@ -33,6 +33,8 @@ def iPerfSimultaneousTest(net):
     for host in hosts:
         info(host.cmd('ifconfig'))
         info(host.cmd('iperf -s &'))
+    for host in hosts:
+        info(host.cmd('iperf -c h4'))
 
     
 
