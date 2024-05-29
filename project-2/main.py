@@ -17,10 +17,9 @@ BW = 100
 if __name__ == '__main__':
     intf = custom(TCIntf, bw=BW, delay=DELAY)
     lg.setLogLevel( 'info' )
-    OVSKernelSwitch.setup()
 
     #network = Mininet(FatTree, switch=OVSKernelSwitch, waitConnected=True, intf=intf)
-    network = Mininet(FatTree(), switch=OVSKernelSwitch, waitConnected=True, intf=intf)
+    network = Mininet(FatTree(), intf=intf)
 
     network.start()
     #network.pingAll()
