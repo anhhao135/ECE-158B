@@ -36,7 +36,8 @@ def iPerfSimultaneousTest(net):
         info(host.cmd('iperf -s &'))
     time.sleep(1)
     h1, h2, h3, h4 = net.getNodeByName('h1', 'h2', 'h3', 'h4')
-    info(h1.cmd('iperf -c 10.0.0.4'))
+    info(h1.sendCmd('iperf -c 10.0.0.4'))
+    info(h2.sendCmd('iperf -c 10.0.0.3'))
 
     
 
