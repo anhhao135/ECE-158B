@@ -52,7 +52,7 @@ if __name__ == '__main__':
     info( "*** Creating network\n" )
     #network = Mininet(SingleSwitchTopo(k=4), switch=OVSKernelSwitch, waitConnected=True, intf=intf)
     #network = Mininet(LinearTopo(k=4), switch=OVSKernelSwitch, waitConnected=True, intf=intf)
-    network = Mininet(LinearTopo(k=2), switch=OVSKernelSwitch, waitConnected=True, intf=intf)
+    network = Mininet(TreeTopo(k=2), switch=OVSKernelSwitch, waitConnected=True, intf=intf)
     info( "*** Starting network\n" )
     network.start()
     info( "*** Running ping test\n" )
