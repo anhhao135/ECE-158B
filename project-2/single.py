@@ -23,8 +23,10 @@ def ifconfigTest( net ):
         info( host.cmd( 'ifconfig' ) )
 
 def iPerfPairsTest(net):
-    h1, h4 = net.getNodeByName('h1', 'h4')
-    net.iperf(( h1, h4 ))
+    h1, h2, h3, h4 = net.getNodeByName('h1', 'h2', 'h3', 'h4')
+    pairs = [(h1, h2), (h1, h4), (h1, h3), (h2, h3), (h2, h4), (h3, h4)]
+    for pair in pairs:
+        net.iperf(pair)
     
 
 
