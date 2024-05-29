@@ -1,9 +1,5 @@
 from mininet.topo import Topo
- 
-#link parameters
-DELAY = '1ms'
-BW = 100
- 
+
 class FatTree( Topo ):
 	def build( self ):
 		#add blue hosts
@@ -57,67 +53,67 @@ class FatTree( Topo ):
 		s1004 = self.addSwitch('s1004', stp=True, failMode='standalone')
 
 		#edge to host links
-		self.addLink(s3001, hb1, bw=BW, delay=DELAY)
-		self.addLink(s3001, hb2, bw=BW, delay=DELAY)
-		self.addLink(s3002, hb3, bw=BW, delay=DELAY)
-		self.addLink(s3002, hb4, bw=BW, delay=DELAY)
+		self.addLink(s3001, hb1)
+		self.addLink(s3001, hb2)
+		self.addLink(s3002, hb3)
+		self.addLink(s3002, hb4)
 		
-		self.addLink(s3003, ho1, bw=BW, delay=DELAY)
-		self.addLink(s3003, ho2, bw=BW, delay=DELAY)
-		self.addLink(s3004, ho3, bw=BW, delay=DELAY)
-		self.addLink(s3004, ho4, bw=BW, delay=DELAY)
+		self.addLink(s3003, ho1)
+		self.addLink(s3003, ho2)
+		self.addLink(s3004, ho3)
+		self.addLink(s3004, ho4)
 
-		self.addLink(s3005, hg1, bw=BW, delay=DELAY)
-		self.addLink(s3005, hg2, bw=BW, delay=DELAY)
-		self.addLink(s3006, hg3, bw=BW, delay=DELAY)
-		self.addLink(s3006, hg4, bw=BW, delay=DELAY)
+		self.addLink(s3005, hg1)
+		self.addLink(s3005, hg2)
+		self.addLink(s3006, hg3)
+		self.addLink(s3006, hg4)
 
-		self.addLink(s3007, hr1, bw=BW, delay=DELAY)
-		self.addLink(s3007, hr2, bw=BW, delay=DELAY)
-		self.addLink(s3008, hr3, bw=BW, delay=DELAY)
-		self.addLink(s3008, hr4, bw=BW, delay=DELAY)
+		self.addLink(s3007, hr1)
+		self.addLink(s3007, hr2)
+		self.addLink(s3008, hr3)
+		self.addLink(s3008, hr4)
 		
 		#aggregation to edge links
-		self.addLink(s2001, s3001, bw=BW, delay=DELAY)
-		self.addLink(s2001, s3002, bw=BW, delay=DELAY)
-		self.addLink(s2002, s3001, bw=BW, delay=DELAY)
-		self.addLink(s2002, s3002, bw=BW, delay=DELAY)
+		self.addLink(s2001, s3001)
+		self.addLink(s2001, s3002)
+		self.addLink(s2002, s3001)
+		self.addLink(s2002, s3002)
 		
-		self.addLink(s2003, s3003, bw=BW, delay=DELAY)
-		self.addLink(s2003, s3004, bw=BW, delay=DELAY)
-		self.addLink(s2004, s3003, bw=BW, delay=DELAY)
-		self.addLink(s2004, s3004, bw=BW, delay=DELAY)
+		self.addLink(s2003, s3003)
+		self.addLink(s2003, s3004)
+		self.addLink(s2004, s3003)
+		self.addLink(s2004, s3004)
 
-		self.addLink(s2005, s3005, bw=BW, delay=DELAY)
-		self.addLink(s2005, s3006, bw=BW, delay=DELAY)
-		self.addLink(s2006, s3005, bw=BW, delay=DELAY)
-		self.addLink(s2006, s3006, bw=BW, delay=DELAY)
+		self.addLink(s2005, s3005)
+		self.addLink(s2005, s3006)
+		self.addLink(s2006, s3005)
+		self.addLink(s2006, s3006)
 
-		self.addLink(s2007, s3007, bw=BW, delay=DELAY)
-		self.addLink(s2007, s3008, bw=BW, delay=DELAY)
-		self.addLink(s2008, s3007, bw=BW, delay=DELAY)
-		self.addLink(s2008, s3008, bw=BW, delay=DELAY)
+		self.addLink(s2007, s3007)
+		self.addLink(s2007, s3008)
+		self.addLink(s2008, s3007)
+		self.addLink(s2008, s3008)
 		
 		#core to aggregation links
-		self.addLink(s1001, s2001, bw=BW, delay=DELAY)
-		self.addLink(s1001, s2003, bw=BW, delay=DELAY)
-		self.addLink(s1001, s2005, bw=BW, delay=DELAY)
-		self.addLink(s1001, s2007, bw=BW, delay=DELAY)
+		self.addLink(s1001, s2001)
+		self.addLink(s1001, s2003)
+		self.addLink(s1001, s2005)
+		self.addLink(s1001, s2007)
 		
-		self.addLink(s1002, s2001, bw=BW, delay=DELAY)
-		self.addLink(s1002, s2003, bw=BW, delay=DELAY)
-		self.addLink(s1002, s2005, bw=BW, delay=DELAY)
-		self.addLink(s1002, s2007, bw=BW, delay=DELAY)
+		self.addLink(s1002, s2001)
+		self.addLink(s1002, s2003)
+		self.addLink(s1002, s2005)
+		self.addLink(s1002, s2007)
 		
-		self.addLink(s1003, s2002, bw=BW, delay=DELAY)
-		self.addLink(s1003, s2004, bw=BW, delay=DELAY)
-		self.addLink(s1003, s2006, bw=BW, delay=DELAY)
-		self.addLink(s1003, s2008, bw=BW, delay=DELAY)
+		self.addLink(s1003, s2002)
+		self.addLink(s1003, s2004)
+		self.addLink(s1003, s2006)
+		self.addLink(s1003, s2008)
 		
-		self.addLink(s1004, s2002, bw=BW, delay=DELAY)
-		self.addLink(s1004, s2004, bw=BW, delay=DELAY)
-		self.addLink(s1004, s2006, bw=BW, delay=DELAY)
-		self.addLink(s1004, s2008, bw=BW, delay=DELAY)
+		self.addLink(s1004, s2002)
+		self.addLink(s1004, s2004)
+		self.addLink(s1004, s2006)
+		self.addLink(s1004, s2008)
 
 
 topos = {
