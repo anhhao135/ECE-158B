@@ -27,6 +27,12 @@ def iPerfPairsTest(net):
     pairs = [(h1, h2), (h1, h4), (h1, h3), (h2, h3), (h2, h4), (h3, h4)]
     for pair in pairs:
         net.iperf(pair)
+
+def iPerfSimultaneousTest(net):
+    hosts = net.hosts
+    for host in hosts:
+        host.cmd('iperf -s') 
+
     
 
 
@@ -43,7 +49,8 @@ if __name__ == '__main__':
     info( "*** Running ping test\n" )
     network.pingAll()
     info( "*** Running iPerf pair tests\n" )
-    iPerfPairsTest(network)
+    #iPerfPairsTest(network)
+    iPerfSimultaneousTest(network)
     info( "*** Starting CLI (type 'exit' to exit)\n" )
     CLI( network )
     info( "*** Stopping network\n" )
