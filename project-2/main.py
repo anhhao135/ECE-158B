@@ -15,9 +15,12 @@ PING_COUNT = 100
 
 def pingTest(net): #host A pings host B 100 times
     info("Ping test\n")
-    hb1 = net.getNodeByName('hb1') #get host A's object
+    hb1, hg1 = net.getNodeByName('hb1', 'hg1')
     pingStart = time.time() #start ping timer
-    info(hb1.cmd('ping 10.0.0.5 -c ' + str(PING_COUNT) + ' > ping.txt')) #start a ping to host B via host A's shell, and dump log to file
+    for i in range(PING_COUNT):
+        net.ping((hb1, hg1))
+        info(str(i) + "\n")
+    #info(hb1.cmd('ping 10.0.0.5 -c ' + str(PING_COUNT) + ' > ping.txt')) #start a ping to host B via host A's shell, and dump log to file
     pingEnd = time.time()
     info("Ping took: " + str(pingEnd - pingStart) + " seconds.\n") #print out total ping time
 
