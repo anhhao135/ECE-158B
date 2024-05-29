@@ -41,6 +41,17 @@ def iPerfSimultaneousTest(net):
     time.sleep(15)
     h1.cmd('cat log12.txt log13.txt log14.txt log42.txt log43.txt log23.txt > log.txt')
 
+def iPerfPingTest(net):
+    info( "*** pinging before iPerf\n" )
+    info(h1.cmd('ping 10.0.0.3'))
+    hosts = net.hosts
+    for host in hosts:
+        host.cmd('iperf -s &')
+    h1, h2, h3, h4 = net.getNodeByName('h1', 'h2', 'h3', 'h4')
+    h1.cmd('iperf -c 10.0.0.2 -d & iperf -c 10.0.0.3 -d & iperf -c 10.0.0.4 -d &')
+    info( "*** pinging during iPerf\n" )
+    info(h1.cmd('ping 10.0.0.3'))
+
     
 
 
@@ -51,13 +62,14 @@ if __name__ == '__main__':
     OVSKernelSwitch.setup()
     info( "*** Creating network\n" )
     #network = Mininet(SingleSwitchTopo(k=4), switch=OVSKernelSwitch, waitConnected=True, intf=intf)
-    #network = Mininet(LinearTopo(k=4), switch=OVSKernelSwitch, waitConnected=True, intf=intf)
-    network = Mininet(TreeTopo(depth=2, fanout=2), switch=OVSKernelSwitch, waitConnected=True, intf=intf)
+    network = Mininet(LinearTopo(k=4), switch=OVSKernelSwitch, waitConnected=True, intf=intf)
+    #network = Mininet(TreeTopo(depth=2, fanout=2), switch=OVSKernelSwitch, waitConnected=True, intf=intf)
     info( "*** Starting network\n" )
     network.start()
     info( "*** Running ping test\n" )
     network.pingAll()
     info( "*** Running iPerf tests\n" )
-    iPerfPairsTest(network)
-    iPerfSimultaneousTest(network)
+    #iPerfPairsTest(network)
+    #iPerfSimultaneousTest(network)
+    iPerfPingTest(network)
     network.stop()
