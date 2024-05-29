@@ -17,10 +17,8 @@ def pingTest(net): #host A pings host B 100 times
     info("Ping test\n")
     hb1, hg1 = net.getNodeByName('hb1', 'hg1')
     pingStart = time.time() #start ping timer
-    for i in range(PING_COUNT):
-        net.ping((hb1, hg1))
-        info(str(i) + "\n")
-    #info(hb1.cmd('ping 10.0.0.5 -c ' + str(PING_COUNT) + ' > ping.txt')) #start a ping to host B via host A's shell, and dump log to file
+    for i in range(PING_COUNT): #ping for 100 times
+        net.ping((hb1, hg1)) #ping between hosts and move on when success
     pingEnd = time.time()
     info("Ping took: " + str(pingEnd - pingStart) + " seconds.\n") #print out total ping time
 
@@ -40,7 +38,7 @@ def elephantAndMiceTest(net): #do both tests at the same time
     info("Started iPerf\n")
     hb1.cmd('iperf -c 10.0.0.5 -n 100M -i 1 > iperfSimul.txt &') #start file transfer from host A, and dump log to file, but make it non-blocking with &
     info("Started pings\n")
-    hb1.cmd('ping 10.0.0.5 -c ' + str(PING_COUNT) + ' > pingSimul.txt') #start pings from host A, and dump log to file, but make it blocking so we know when the pings are finished and we can inspect the log files
+    pingTest(net) #do blocking ping test and print out time with iperf test running in background
 
 if __name__ == '__main__':
     lg.setLogLevel( 'info' ) #for print out debugging
