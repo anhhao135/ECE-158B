@@ -32,14 +32,13 @@ def iPerfPairsTest(net):
 def iPerfSimultaneousTest(net):
     hosts = net.hosts
     for host in hosts:
-        info(host.cmd('ifconfig'))
-        info(host.cmd('iperf -s &'))
+        host.cmd('iperf -s &')
     h1, h2, h3, h4 = net.getNodeByName('h1', 'h2', 'h3', 'h4')
-    info(h1.cmd('iperf -c 10.0.0.2 -d > log12.txt & iperf -c 10.0.0.3 -d > log13.txt &iperf -c 10.0.0.4 -d > log14.txt &'))
-    info(h4.cmd('iperf -c 10.0.0.2 -d > log42.txt & iperf -c 10.0.0.3 -d > log43.txt &'))
-    info(h2.cmd('iperf -c 10.0.0.3 -d> log23.txt &'))
+    h1.cmd('iperf -c 10.0.0.2 -d > log12.txt & iperf -c 10.0.0.3 -d > log13.txt &iperf -c 10.0.0.4 -d > log14.txt &')
+    h4.cmd('iperf -c 10.0.0.2 -d > log42.txt & iperf -c 10.0.0.3 -d > log43.txt &')
+    h2.cmd('iperf -c 10.0.0.3 -d> log23.txt &')
     time.sleep(15)
-    info(h1.cmd('cat log12.txt log13.txt log14.txt log42.txt log43.txt log23.txt > log.txt'))
+    h1.cmd('cat log12.txt log13.txt log14.txt log42.txt log43.txt log23.txt > log.txt')
 
     
 
