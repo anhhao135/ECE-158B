@@ -33,8 +33,10 @@ def elephantAndMiceTest(net):
     info("Elephant and mice test\n")
     hb1, hg1 = net.getNodeByName('hb1', 'hg1')
     hg1.cmd('iperf -s &')
-    hb1.cmd('ping 10.0.0.5 -c ' + str(PING_COUNT) + ' > pingSimul.txt &')
-    info(hb1.cmd('iperf -c 10.0.0.5 -n 100M > iperfSimul.txt'))
+    info("Started iPerf\n")
+    hb1.cmd('iperf -c 10.0.0.5 -n 100M > iperfSimul.txt &')
+    info("Started pings\n")
+    hb1.cmd('ping 10.0.0.5 -c ' + str(PING_COUNT) + ' > pingSimul.txt')
 
 if __name__ == '__main__':
     intf = custom(TCIntf, bw=BW, delay=DELAY)
