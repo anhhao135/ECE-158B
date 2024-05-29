@@ -31,6 +31,9 @@ if __name__ == '__main__':
     network = Mininet(FatTree(), intf=intf, waitConnected=True)
 
     network.start()
+    info("Waiting for STP to converge...\n")
+    time.sleep(35)
+
     #pingTest(network)
     #network.pingAll()
 
