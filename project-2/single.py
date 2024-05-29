@@ -32,7 +32,7 @@ def iPerfSimultaneousTest(net):
     hosts = net.hosts
     for host in hosts:
         info(host.cmd('ifconfig'))
-        info(host.cmd('iperf -s'))
+        info(host.cmd('iperf -s &'))
 
     
 
