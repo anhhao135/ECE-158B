@@ -31,7 +31,7 @@ if __name__ == '__main__':
     network = Mininet(FatTree(), intf=intf, waitConnected=True)
 
     network.start()
-    pingTest(network)
+    #pingTest(network)
     #network.pingAll()
 
     CLI( network )
