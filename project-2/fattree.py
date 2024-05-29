@@ -24,7 +24,7 @@ class FatTree( Topo ):
 		hr1 = self.addHost('hr1')
 		hr2 = self.addHost('hr2')
 		hr3 = self.addHost('hr3')
-		hr4 = self.addHost('hr4') #host C
+		hr4 = self.addHost('hr4')
 
 		#add edge switches
 		s3001 = self.addSwitch('s3001', stp=True, failMode='standalone')

@@ -5,6 +5,7 @@ from mininet.topo import SingleSwitchTopo, LinearTopo
 from mininet.topolib import TreeTopo
 from mininet.link import TCIntf
 from mininet.util import custom
+from mininet.cli import CLI
 import time
 
 BW = 100
@@ -54,5 +55,6 @@ if __name__ == '__main__':
     #iPerfPairsTest(network)
     #iPerfSimultaneousTest(network)
     iPerfPingTest(network)
+    CLI( net )
 
     network.stop()
