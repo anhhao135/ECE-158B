@@ -34,7 +34,7 @@ if __name__ == '__main__':
     info("Waiting for STP to converge...\n")
     time.sleep(35)
 
-    #pingTest(network)
+    pingTest(network)
     #network.pingAll()
 
     CLI( network )
