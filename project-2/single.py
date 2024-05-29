@@ -42,12 +42,12 @@ def iPerfSimultaneousTest(net):
     h1.cmd('cat log12.txt log13.txt log14.txt log42.txt log43.txt log23.txt > log.txt')
 
 def iPerfPingTest(net):
-    info( "*** pinging before iPerf\n" )
-    info(h1.cmd('ping 10.0.0.3'))
     hosts = net.hosts
     for host in hosts:
         host.cmd('iperf -s &')
     h1, h2, h3, h4 = net.getNodeByName('h1', 'h2', 'h3', 'h4')
+    info( "*** pinging before iPerf\n" )
+    info(h1.cmd('ping 10.0.0.3'))
     h1.cmd('iperf -c 10.0.0.2 -d & iperf -c 10.0.0.3 -d & iperf -c 10.0.0.4 -d &')
     info( "*** pinging during iPerf\n" )
     info(h1.cmd('ping 10.0.0.3'))
