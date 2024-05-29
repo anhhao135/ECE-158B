@@ -34,11 +34,12 @@ def iPerfSimultaneousTest(net):
     for host in hosts:
         info(host.cmd('ifconfig'))
         info(host.cmd('iperf -s &'))
-    time.sleep(1)
     h1, h2, h3, h4 = net.getNodeByName('h1', 'h2', 'h3', 'h4')
     info(h1.cmd('iperf -c 10.0.0.2 > log12.txt & iperf -c 10.0.0.3 > log13.txt &iperf -c 10.0.0.4 > log14.txt &'))
     info(h4.cmd('iperf -c 10.0.0.2 > log42.txt & iperf -c 10.0.0.3 > log43.txt &'))
     info(h2.cmd('iperf -c 10.0.0.3 > log23.txt &'))
+    time.sleep(15)
+    h1.cmd('echo log12.txt')
 
     
 
