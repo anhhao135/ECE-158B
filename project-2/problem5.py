@@ -1,11 +1,3 @@
-#!/usr/bin/env python
-
-"""
-This example shows how to create a network and run multiple tests.
-For a more complicated test example, see udpbwtest.py.
-"""
-
-from mininet.cli import CLI
 from mininet.log import lg, info
 from mininet.net import Mininet
 from mininet.node import OVSKernelSwitch
@@ -17,12 +9,6 @@ import time
 
 BW = 100
 DELAY = '1ms'
-
-def ifconfigTest( net ):
-    "Run ifconfig on all hosts in net."
-    hosts = net.hosts
-    for host in hosts:
-        info( host.cmd( 'ifconfig' ) )
 
 def iPerfPairsTest(net):
     h1, h2, h3, h4 = net.getNodeByName('h1', 'h2', 'h3', 'h4')
@@ -52,24 +38,21 @@ def iPerfPingTest(net):
     info( "*** pinging during iPerf\n" )
     info(h1.cmd('ping 10.0.0.3 -c 5'))
 
-    
-
 
 if __name__ == '__main__':
     intf = custom(TCIntf, bw=BW, delay=DELAY)
     lg.setLogLevel( 'info' )
-    info( "*** Initializing Mininet and kernel modules\n" )
     OVSKernelSwitch.setup()
-    info( "*** Creating network\n" )
-    #network = Mininet(SingleSwitchTopo(k=4), switch=OVSKernelSwitch, waitConnected=True, intf=intf)
-    network = Mininet(LinearTopo(k=4), switch=OVSKernelSwitch, waitConnected=True, intf=intf)
+
+    network = Mininet(SingleSwitchTopo(k=4), switch=OVSKernelSwitch, waitConnected=True, intf=intf)
+    #network = Mininet(LinearTopo(k=4), switch=OVSKernelSwitch, waitConnected=True, intf=intf)
     #network = Mininet(TreeTopo(depth=2, fanout=2), switch=OVSKernelSwitch, waitConnected=True, intf=intf)
-    info( "*** Starting network\n" )
+
     network.start()
-    info( "*** Running ping test\n" )
     network.pingAll()
-    info( "*** Running iPerf tests\n" )
+    
     #iPerfPairsTest(network)
     #iPerfSimultaneousTest(network)
     iPerfPingTest(network)
+
     network.stop()
