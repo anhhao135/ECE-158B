@@ -10,7 +10,7 @@ from fattree import FatTree
 from mininet.cli import CLI
 
 
-DELAY = '1ms'
+DELAY = '100ms'
 BW = 100
  
 
@@ -19,7 +19,7 @@ if __name__ == '__main__':
     lg.setLogLevel( 'info' )
 
     #network = Mininet(FatTree, switch=OVSKernelSwitch, waitConnected=True, intf=intf)
-    network = Mininet(FatTree(), intf=intf)
+    network = Mininet(FatTree(), intf=intf, wait)
 
     network.start()
     #network.pingAll()
