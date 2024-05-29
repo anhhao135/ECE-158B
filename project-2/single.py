@@ -39,11 +39,17 @@ def iPerfSimultaneousTest(net):
     info(h4.cmd('iperf -c 10.0.0.2 > log42.txt & iperf -c 10.0.0.3 > log43.txt &'))
     info(h2.cmd('iperf -c 10.0.0.3 > log23.txt &'))
     time.sleep(15)
+    info("1-2")
     info(h1.cmd('cat log12.txt'))
+    info("1-3")
     info(h1.cmd('cat log13.txt'))
+    info("1-4")
     info(h1.cmd('cat log14.txt'))
+    info("4-2")
     info(h1.cmd('cat log42.txt'))
+    info("4-3")
     info(h1.cmd('cat log43.txt'))
+    info("2-3")
     info(h1.cmd('cat log23.txt'))
 
     
