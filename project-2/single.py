@@ -31,7 +31,7 @@ def iPerfPairsTest(net):
 def iPerfSimultaneousTest(net):
     hosts = net.hosts
     for host in hosts:
-        host.cmd('iperf -s') 
+        info(host.cmd('iperf -s'))
 
     
 
