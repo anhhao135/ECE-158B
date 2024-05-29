@@ -47,10 +47,10 @@ def iPerfPingTest(net):
         host.cmd('iperf -s &')
     h1, h2, h3, h4 = net.getNodeByName('h1', 'h2', 'h3', 'h4')
     info( "*** pinging before iPerf\n" )
-    info(h1.cmd('ping 10.0.0.3'))
+    info(h1.cmd('ping 10.0.0.3 -c 5'))
     h1.cmd('iperf -c 10.0.0.2 -d & iperf -c 10.0.0.3 -d & iperf -c 10.0.0.4 -d &')
     info( "*** pinging during iPerf\n" )
-    info(h1.cmd('ping 10.0.0.3'))
+    info(h1.cmd('ping 10.0.0.3 -c 5'))
 
     
 
