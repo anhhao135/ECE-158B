@@ -51,6 +51,7 @@ def iPerfSimultaneousTest(net):
     info(h1.cmd('cat log43.txt'))
     info("2-3\n")
     info(h1.cmd('cat log23.txt'))
+    info(h1.cmd('cat log12.txt log13.txt log14.txt log42.txt log43.txt log23.txt > log.txt'))
 
     
 
