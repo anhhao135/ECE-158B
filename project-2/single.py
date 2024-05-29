@@ -10,6 +10,11 @@ from mininet.log import lg, info
 from mininet.net import Mininet
 from mininet.node import OVSKernelSwitch
 from mininet.topo import SingleSwitchTopo
+from mininet.link import TCIntf
+from mininet.util import custom
+
+BW = 100
+DELAY = '1ms'
 
 def ifconfigTest( net ):
     "Run ifconfig on all hosts in net."
@@ -24,12 +29,13 @@ def iPerfPairsTest(net):
 
 
 if __name__ == '__main__':
+    intf = custom(TCIntf, bw=BW, delay=DELAY)
     lg.setLogLevel( 'info' )
     info( "*** Initializing Mininet and kernel modules\n" )
     OVSKernelSwitch.setup()
     info( "*** Creating network\n" )
-    network = Mininet( SingleSwitchTopo( k=4 ), switch=OVSKernelSwitch,
-                       waitConnected=True )
+    network = Mininet(SingleSwitchTopo(k=4), switch=OVSKernelSwitch,
+                       waitConnected=True, intf=intf)
     info( "*** Starting network\n" )
     network.start()
     info( "*** Running ping test\n" )
