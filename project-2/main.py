@@ -25,7 +25,7 @@ def iPerfTest(net):
     hb1, hg1 = net.getNodeByName('hb1', 'hg1')
     hg1.cmd('iperf -s &')
     iPerfStart = time.time()
-    info(hb1.cmd('iperf -c 10.0.0.5 -n 100M > iperf.txt'))
+    info(hb1.cmd('iperf -c 10.0.0.5 -n 100M -i 1 > iperf.txt'))
     iPerfEnd = time.time()
     info("100MB iPerf took: " + str(iPerfEnd - iPerfStart) + " seconds.\n")
 
@@ -34,7 +34,7 @@ def elephantAndMiceTest(net):
     hb1, hg1 = net.getNodeByName('hb1', 'hg1')
     hg1.cmd('iperf -s &')
     info("Started iPerf\n")
-    hb1.cmd('iperf -c 10.0.0.5 -n 100M > iperfSimul.txt &')
+    hb1.cmd('iperf -c 10.0.0.5 -n 100M -i 1 > iperfSimul.txt &')
     info("Started pings\n")
     hb1.cmd('ping 10.0.0.5 -c ' + str(PING_COUNT) + ' > pingSimul.txt')
 
