@@ -16,7 +16,7 @@ if __name__ == '__main__':
     OVSKernelSwitch.setup()
 
     #network = Mininet(FatTree, switch=OVSKernelSwitch, waitConnected=True, intf=intf)
-    network = Mininet(FatTree, switch=OVSKernelSwitch, waitConnected=True)
+    network = Mininet(FatTree(), switch=OVSKernelSwitch, waitConnected=True)
 
     network.start()
     #network.pingAll()
