@@ -10,7 +10,7 @@ from fattree import FatTree
 from mininet.cli import CLI
 
 
-DELAY = '100ms'
+DELAY = '1ms'
 BW = 100
  
 
